@@ -10,7 +10,6 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_tags=[
-        {"name": "items", "description": "Operations with items."},
         {"name": "users", "description": "User management operations."},
     ],
 )
