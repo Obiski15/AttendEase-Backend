@@ -7,40 +7,34 @@ from app.core.config import settings
 # This automatically creates tables if they don't exist
 from app.db.session import engine
 from app.db.base import Base
+
 Base.metadata.create_all(bind=engine)
 
-description = """
-Backend API for the AttendEase attendance management system.
-
-### Authentication
-
-JWT-based auth with two tokens:
-
-- access_token - short-lived, sent on every request as `Authorization: Bearer <token>`.
-- refresh_token - long-lived, POST to `/api/v1/auth/refresh` to get a new pair when the access token expires.
-
-No server-side session or token blacklist. Logout is handled on the client by discarding the tokens.
-
-Click Authorize and log in with your email and password to try protected endpoints.
-
-### Roles
-
-- ADMIN - manages departments, courses, sessions, assignments, lecturers and students.
-- LECTURER - opens and closes attendance sessions and views check-ins for their own courses.
-- STUDENT - checks in to attendance sessions and views their own records.
-"""
+description = "Backend API for the AttendEase attendance management system"
 
 tags_metadata = [
-    {"name": "auth", "description": "Login, token refresh, registration, and current user."},
+    {
+        "name": "auth",
+        "description": "Login, token refresh, registration, and current user.",
+    },
     {"name": "users", "description": "User account administration (admin)."},
     {"name": "departments", "description": "Academic departments."},
     {"name": "students", "description": "Student accounts and profiles."},
     {"name": "lecturers", "description": "Lecturer accounts and profiles."},
     {"name": "courses", "description": "Courses offered by departments."},
     {"name": "academic-sessions", "description": "Academic sessions / semesters."},
-    {"name": "course-assignments", "description": "Assigning lecturers to courses per session."},
-    {"name": "attendance-sessions", "description": "Attendance windows opened by lecturers."},
-    {"name": "attendance", "description": "Student check-in and personal attendance records."},
+    {
+        "name": "course-assignments",
+        "description": "Assigning lecturers to courses per session.",
+    },
+    {
+        "name": "attendance-sessions",
+        "description": "Attendance windows opened by lecturers.",
+    },
+    {
+        "name": "attendance",
+        "description": "Student check-in and personal attendance records.",
+    },
 ]
 
 app = FastAPI(
