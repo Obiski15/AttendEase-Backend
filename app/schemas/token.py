@@ -1,12 +1,21 @@
 from pydantic import BaseModel, Field
 
+from app.schemas.user import User
+
 
 class Token(BaseModel):
     """Token pair returned on login, register or refresh."""
 
     access_token: str = Field(..., description="Short-lived token sent on every request.")
     refresh_token: str = Field(..., description="Long-lived token used to get new access tokens.")
-    token_type: str = Field(default="bearer", description="Always 'bearer'.")
+
+
+class LoginResponse(BaseModel):
+    """Response returned on login and register — tokens plus user profile."""
+
+    access_token: str
+    refresh_token: str
+    user: User
 
 
 class TokenRefresh(BaseModel):

@@ -16,16 +16,17 @@ from app.models.user import User
 router = APIRouter()
 
 
-def _issue_tokens(user: User) -> schemas.Token:
-    return schemas.Token(
+def _build_login_response(user: User) -> schemas.LoginResponse:
+    return schemas.LoginResponse(
         access_token=create_access_token(user.id, user.role),
         refresh_token=create_refresh_token(user.id, user.role),
+        user=schemas.User.model_validate(user),
     )
 
 
 @router.post(
     "/login",
-    response_model=schemas.Token,
+    response_model=schemas.LoginResponse,
     summary="Log in and obtain tokens",
 )
 def login(
@@ -49,12 +50,12 @@ def login(
         )
 
     crud.user.touch_last_login(db, user=user)
-    return _issue_tokens(user)
+    return _build_login_response(user)
 
 
 @router.post(
     "/refresh",
-    response_model=schemas.Token,
+    response_model=schemas.LoginResponse,
     summary="Refresh the access token",
 )
 def refresh_token(
@@ -77,12 +78,12 @@ def refresh_token(
     if user is None or not crud.user.is_active(user):
         raise invalid
 
-    return _issue_tokens(user)
+    return _build_login_response(user)
 
 
 @router.post(
     "/register",
-    response_model=schemas.Token,
+    response_model=schemas.LoginResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Register a new student (self-service)",
 )
@@ -103,7 +104,7 @@ def register(
         raise HTTPException(status_code=404, detail="Department not found.")
 
     student = crud.student.create_with_user(db, obj_in=body)
-    return _issue_tokens(student.user)
+    return _build_login_response(student.user)
 
 
 @router.get(
