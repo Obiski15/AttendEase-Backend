@@ -1,9 +1,15 @@
+from .token import Token, TokenRefresh
 from .user import User, UserCreate, UserUpdate
 from .department import Department, DepartmentCreate, DepartmentUpdate
-from .student import Student, StudentCreate, StudentUpdate
+from .student import Student, StudentCreate, StudentRegister, StudentUpdate
 from .lecturer import Lecturer, LecturerCreate, LecturerUpdate
 from .course import Course, CourseCreate, CourseUpdate
 from .academic_session import AcademicSession, AcademicSessionCreate, AcademicSessionUpdate
 from .course_assignment import CourseAssignment, CourseAssignmentCreate, CourseAssignmentUpdate
 from .attendance_session import AttendanceSession, AttendanceSessionCreate, AttendanceSessionUpdate
-from .attendance_record import AttendanceRecord, AttendanceRecordCreate, AttendanceRecordUpdate
+from .attendance_record import (
+    AttendanceRecord,
+    AttendanceRecordCreate,
+    AttendanceRecordUpdate,
+    AttendanceCheckIn,
+)

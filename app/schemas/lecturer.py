@@ -2,7 +2,9 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+
+from app.schemas.user import User
 
 
 class LecturerBase(BaseModel):
@@ -11,7 +13,11 @@ class LecturerBase(BaseModel):
 
 
 class LecturerCreate(LecturerBase):
-    user_id: UUID
+    """Admin creates a lecturer: provisions the User account + Lecturer profile."""
+
+    email: EmailStr
+    password: str
+    full_name: str
     staff_id: str
     department_id: UUID
 
@@ -24,5 +30,6 @@ class Lecturer(LecturerBase):
     user_id: UUID
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    user: Optional[User] = None
 
     model_config = {"from_attributes": True}

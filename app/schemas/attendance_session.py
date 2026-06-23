@@ -2,7 +2,7 @@ from datetime import date, datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AttendanceSessionBase(BaseModel):
@@ -14,12 +14,20 @@ class AttendanceSessionBase(BaseModel):
     status: Optional[str] = "ACTIVE"
 
 
-class AttendanceSessionCreate(AttendanceSessionBase):
+class AttendanceSessionCreate(BaseModel):
+    """Open a new attendance window for a course assignment.
+
+    `session_code` is auto-generated and `start_time` defaults to now if
+    omitted. Provide either `expires_at` or `duration_minutes` to set when the
+    window closes (defaults to 60 minutes).
+    """
+
     course_assignment_id: UUID
-    session_date: date
-    start_time: datetime
-    expires_at: datetime
-    session_code: str
+    session_date: Optional[date] = Field(default=None, description="Defaults to today.")
+    start_time: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
+    duration_minutes: Optional[int] = Field(default=60, ge=1, description="Used when expires_at is not given.")
+    session_code: Optional[str] = Field(default=None, description="Auto-generated if omitted.")
 
 
 class AttendanceSessionUpdate(BaseModel):
