@@ -2,7 +2,9 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+
+from app.schemas.user import User
 
 
 class StudentBase(BaseModel):
@@ -13,7 +15,23 @@ class StudentBase(BaseModel):
 
 
 class StudentCreate(StudentBase):
-    user_id: UUID
+    """Admin creates a student: provisions the User account + Student profile."""
+
+    email: EmailStr
+    password: str
+    full_name: str
+    student_id: str
+    matric_number: str
+    department_id: UUID
+    level: str
+
+
+class StudentRegister(BaseModel):
+    """Public self-registration payload for a new student."""
+
+    email: EmailStr
+    password: str
+    full_name: str
     student_id: str
     matric_number: str
     department_id: UUID
@@ -28,5 +46,6 @@ class Student(StudentBase):
     user_id: UUID
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    user: Optional[User] = None
 
     model_config = {"from_attributes": True}
