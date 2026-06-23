@@ -1,4 +1,4 @@
-from .token import Token, TokenRefresh
+from .token import Token, TokenRefresh, LoginPayload
 from .user import User, UserCreate, UserUpdate
 from .department import Department, DepartmentCreate, DepartmentUpdate
 from .student import Student, StudentCreate, StudentRegister, StudentUpdate

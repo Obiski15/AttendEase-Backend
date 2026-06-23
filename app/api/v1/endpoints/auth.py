@@ -1,7 +1,7 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app import crud, schemas
@@ -30,15 +30,15 @@ def _issue_tokens(user: User) -> schemas.Token:
     summary="Log in and obtain tokens",
 )
 def login(
+    payload: schemas.LoginPayload,
     db: Session = Depends(deps.get_db),
-    form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> Any:
-    """Authenticate with email (as `username`) and password.
+    """Authenticate with email and password.
 
     Returns an access_token and a refresh_token. Send the access token as
     `Authorization: Bearer <token>` on every request.
     """
-    user = crud.user.authenticate(db, email=form_data.username, password=form_data.password)
+    user = crud.user.authenticate(db, email=payload.email, password=payload.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

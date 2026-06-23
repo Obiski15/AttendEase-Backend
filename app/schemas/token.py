@@ -13,3 +13,10 @@ class TokenRefresh(BaseModel):
     """Body for exchanging a refresh token for a new token pair."""
 
     refresh_token: str
+
+
+class LoginPayload(BaseModel):
+    """Body for logging in."""
+    
+    email: str
+    password: str

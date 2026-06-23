@@ -4,6 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.api import api_router
 from app.core.config import settings
 
+# This automatically creates tables if they don't exist
+from app.db.session import engine
+from app.db.base import Base
+Base.metadata.create_all(bind=engine)
+
 description = """
 Backend API for the AttendEase attendance management system.
 

@@ -1,7 +1,7 @@
 from typing import Generator, List
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
 from app import crud
@@ -10,9 +10,9 @@ from app.core.config import settings
 from app.db.session import SessionLocal
 from app.models.user import User
 
-# Points Swagger's "Authorize" button at the login endpoint so the
-# interactive docs can obtain and attach a bearer token automatically.
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/login")
+# This tells Swagger UI to use a simple "Bearer Token" input box
+# instead of the full OAuth2 Password Flow form.
+security = HTTPBearer()
 
 
 def get_db() -> Generator:
@@ -25,14 +25,14 @@ def get_db() -> Generator:
 
 def get_current_user(
     db: Session = Depends(get_db),
-    token: str = Depends(reusable_oauth2),
+    auth: HTTPAuthorizationCredentials = Depends(security),
 ) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    payload = decode_token(token)
+    payload = decode_token(auth.credentials)
     if payload is None or payload.get("type") != ACCESS_TOKEN_TYPE:
         raise credentials_exception
 
