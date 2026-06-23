@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -48,7 +48,7 @@ def check_in(
     record = AttendanceRecord(
         session_id=session.id,
         student_id=student.user_id,
-        check_in_time=datetime.utcnow(),
+        check_in_time=datetime.now(timezone.utc),
         status="PRESENT",
     )
     db.add(record)

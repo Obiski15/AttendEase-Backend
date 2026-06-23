@@ -1,23 +1,30 @@
 import uuid
+from datetime import datetime
+from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import Column, DateTime, ForeignKey, func
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base_class import Base
+
+if TYPE_CHECKING:
+    from app.models.academic_session import AcademicSession
+    from app.models.attendance_session import AttendanceSession
+    from app.models.course import Course
+    from app.models.lecturer import Lecturer
 
 
 class CourseAssignment(Base):
     __tablename__ = "course_assignments"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id"), nullable=False)
-    lecturer_id = Column(UUID(as_uuid=True), ForeignKey("lecturers.user_id"), nullable=False)
-    academic_session_id = Column(UUID(as_uuid=True), ForeignKey("academic_sessions.id"), nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
+    lecturer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("lecturers.user_id"))
+    academic_session_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("academic_sessions.id"))
+    created_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now(), onupdate=func.now())
 
-    course = relationship("Course", back_populates="course_assignments")
-    lecturer = relationship("Lecturer", back_populates="course_assignments")
-    academic_session = relationship("AcademicSession", back_populates="course_assignments")
-    attendance_sessions = relationship("AttendanceSession", back_populates="course_assignment")
+    course: Mapped["Course"] = relationship(back_populates="course_assignments")
+    lecturer: Mapped["Lecturer"] = relationship(back_populates="course_assignments")
+    academic_session: Mapped["AcademicSession"] = relationship(back_populates="course_assignments")
+    attendance_sessions: Mapped[List["AttendanceSession"]] = relationship(back_populates="course_assignment")

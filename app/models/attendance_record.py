@@ -1,10 +1,15 @@
 import uuid
+from datetime import datetime
+from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Column, String, DateTime, ForeignKey, UniqueConstraint, func
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey, String, UniqueConstraint, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base_class import Base
+
+if TYPE_CHECKING:
+    from app.models.attendance_session import AttendanceSession
+    from app.models.student import Student
 
 
 class AttendanceRecord(Base):
@@ -13,12 +18,12 @@ class AttendanceRecord(Base):
         UniqueConstraint("session_id", "student_id", name="uq_session_student"),
     )
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    session_id = Column(UUID(as_uuid=True), ForeignKey("attendance_sessions.id"), nullable=False)
-    student_id = Column(UUID(as_uuid=True), ForeignKey("students.user_id"), nullable=False)
-    check_in_time = Column(DateTime, nullable=False)
-    status = Column(String, default="PRESENT")
-    created_at = Column(DateTime, server_default=func.now())
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    session_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("attendance_sessions.id"))
+    student_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("students.user_id"))
+    check_in_time: Mapped[datetime] = mapped_column()
+    status: Mapped[str] = mapped_column(String, default="PRESENT")
+    created_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())
 
-    attendance_session = relationship("AttendanceSession", back_populates="attendance_records")
-    student = relationship("Student", back_populates="attendance_records")
+    attendance_session: Mapped["AttendanceSession"] = relationship(back_populates="attendance_records")
+    student: Mapped["Student"] = relationship(back_populates="attendance_records")

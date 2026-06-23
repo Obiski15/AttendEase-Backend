@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Union
 
 from sqlalchemy.orm import Session
@@ -50,12 +50,12 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return user.status == "ACTIVE" and user.deleted_at is None
 
     def touch_last_login(self, db: Session, *, user: User) -> None:
-        user.last_login = datetime.utcnow()
+        user.last_login = datetime.now(timezone.utc)
         db.add(user)
         db.commit()
 
     def soft_delete(self, db: Session, *, user: User) -> User:
-        user.deleted_at = datetime.utcnow()
+        user.deleted_at = datetime.now(timezone.utc)
         user.status = "INACTIVE"
         db.add(user)
         db.commit()
