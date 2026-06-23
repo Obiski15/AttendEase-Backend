@@ -11,9 +11,10 @@ class AcademicSessionBase(BaseModel):
     is_active: Optional[bool] = False
 
 
-class AcademicSessionCreate(AcademicSessionBase):
+class AcademicSessionCreate(BaseModel):
     session_name: str
     semester: str
+    is_active: Optional[bool] = False
 
 
 class AcademicSessionUpdate(AcademicSessionBase):

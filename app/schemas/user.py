@@ -13,11 +13,13 @@ class UserBase(BaseModel):
     profile_image_url: Optional[str] = None
 
 
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
     email: EmailStr
     password: str
     full_name: str
     role: str
+    status: Optional[str] = "ACTIVE"
+    profile_image_url: Optional[str] = None
 
 
 class UserUpdate(UserBase):

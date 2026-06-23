@@ -4,8 +4,11 @@ Tokens are stateless signed JWTs and are not stored server-side. There is no
 Redis, blacklist or token table. Logout is handled on the client by discarding
 the tokens.
 """
+
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
+from uuid import UUID
+
 
 import bcrypt
 import jwt
@@ -33,7 +36,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 def _create_token(
-    subject: str, role: str, token_type: str, expires_delta: timedelta
+    subject: UUID, role: str, token_type: str, expires_delta: timedelta
 ) -> str:
     now = datetime.now(timezone.utc)
     payload: dict[str, Any] = {
@@ -46,7 +49,7 @@ def _create_token(
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
-def create_access_token(subject: str, role: str) -> str:
+def create_access_token(subject: UUID, role: str) -> str:
     return _create_token(
         subject,
         role,
@@ -55,7 +58,7 @@ def create_access_token(subject: str, role: str) -> str:
     )
 
 
-def create_refresh_token(subject: str, role: str) -> str:
+def create_refresh_token(subject: UUID, role: str) -> str:
     return _create_token(
         subject,
         role,
@@ -67,8 +70,6 @@ def create_refresh_token(subject: str, role: str) -> str:
 def decode_token(token: str) -> Optional[dict]:
     """Return the decoded payload, or None if invalid/expired."""
     try:
-        return jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-        )
+        return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
     except jwt.PyJWTError:
         return None

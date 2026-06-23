@@ -12,7 +12,7 @@ class LecturerBase(BaseModel):
     department_id: Optional[UUID] = None
 
 
-class LecturerCreate(LecturerBase):
+class LecturerCreate(BaseModel):
     """Admin creates a lecturer: provisions the User account + Lecturer profile."""
 
     email: EmailStr

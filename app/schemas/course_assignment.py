@@ -11,7 +11,7 @@ class CourseAssignmentBase(BaseModel):
     academic_session_id: Optional[UUID] = None
 
 
-class CourseAssignmentCreate(CourseAssignmentBase):
+class CourseAssignmentCreate(BaseModel):
     course_id: UUID
     lecturer_id: UUID
     academic_session_id: UUID

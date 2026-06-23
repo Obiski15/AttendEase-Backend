@@ -12,7 +12,7 @@ class AttendanceRecordBase(BaseModel):
     status: Optional[str] = "PRESENT"
 
 
-class AttendanceRecordCreate(AttendanceRecordBase):
+class AttendanceRecordCreate(BaseModel):
     session_id: UUID
     student_id: UUID
     check_in_time: datetime

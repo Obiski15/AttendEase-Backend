@@ -12,7 +12,7 @@ class CourseBase(BaseModel):
     department_id: Optional[UUID] = None
 
 
-class CourseCreate(CourseBase):
+class CourseCreate(BaseModel):
     course_code: str
     title: str
     credit_units: int

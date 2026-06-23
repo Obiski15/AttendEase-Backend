@@ -14,7 +14,7 @@ class StudentBase(BaseModel):
     level: Optional[str] = None
 
 
-class StudentCreate(StudentBase):
+class StudentCreate(BaseModel):
     """Admin creates a student: provisions the User account + Student profile."""
 
     email: EmailStr

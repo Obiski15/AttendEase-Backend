@@ -1,7 +1,6 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app import crud, schemas
@@ -45,7 +44,9 @@ def login(
             detail="Incorrect email or password",
         )
     if not crud.user.is_active(user):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user"
+        )
 
     crud.user.touch_last_login(db, user=user)
     return _issue_tokens(user)
@@ -91,9 +92,13 @@ def register(
 ) -> Any:
     """Public sign-up for students. Creates the account and returns a token pair."""
     if crud.user.get_by_email(db, email=body.email):
-        raise HTTPException(status_code=400, detail="A user with this email already exists.")
+        raise HTTPException(
+            status_code=400, detail="A user with this email already exists."
+        )
     if crud.student.get_by_matric(db, matric_number=body.matric_number):
-        raise HTTPException(status_code=400, detail="This matric number is already registered.")
+        raise HTTPException(
+            status_code=400, detail="This matric number is already registered."
+        )
     if not crud.department.get(db, id=body.department_id):
         raise HTTPException(status_code=404, detail="Department not found.")
 

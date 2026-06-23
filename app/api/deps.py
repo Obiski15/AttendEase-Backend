@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from app import crud
 from app.core.security import ACCESS_TOKEN_TYPE, decode_token
-from app.core.config import settings
 from app.db.session import SessionLocal
 from app.models.user import User
 
@@ -50,7 +49,9 @@ def get_current_active_user(
     current_user: User = Depends(get_current_user),
 ) -> User:
     if not crud.user.is_active(current_user):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user"
+        )
     return current_user
 
 

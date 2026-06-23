@@ -9,7 +9,7 @@ class DepartmentBase(BaseModel):
     name: Optional[str] = None
 
 
-class DepartmentCreate(DepartmentBase):
+class DepartmentCreate(BaseModel):
     name: str
 
 
