@@ -7,6 +7,7 @@ from app.api.v1.endpoints import (
     auth,
     course_assignments,
     courses,
+    dashboard,
     departments,
     lecturers,
     students,
@@ -31,3 +32,4 @@ api_router.include_router(
     attendance_sessions.router, prefix="/attendance-sessions", tags=["attendance-sessions"]
 )
 api_router.include_router(attendance.router, prefix="/attendance", tags=["attendance"])
+api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])

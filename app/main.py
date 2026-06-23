@@ -35,6 +35,10 @@ tags_metadata = [
         "name": "attendance",
         "description": "Student check-in and personal attendance records.",
     },
+    {
+        "name": "dashboard",
+        "description": "Role-specific dashboard summaries for admin, lecturer and student.",
+    },
 ]
 
 app = FastAPI(
