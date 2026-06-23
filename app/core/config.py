@@ -3,20 +3,27 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "postgresql://user:password@localhost/dbname"
+    DB_USER: str
+    DB_PASSWORD: str
+    DB_HOST: str
+    DB_PORT: int
+    DB_NAME: str
+
+    @property
+    def DATABASE_URL(self) -> str:
+        return (
+            f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}"
+            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        )
 
     # API
     API_V1_PREFIX: str = "/api/v1"
 
     # JWT / Auth
-    # NOTE: override SECRET_KEY in production via the .env file.
-    SECRET_KEY: str = "CHANGE_ME_super_secret_dev_key_do_not_use_in_prod"
-    ALGORITHM: str = "HS256"
-    # Short-lived access token: sent on every request.
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    # Long-lived refresh token: used to silently obtain a new access token,
-    # so the user stays logged in without re-entering credentials.
-    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    REFRESH_TOKEN_EXPIRE_DAYS: int
 
     model_config = SettingsConfigDict(env_file=".env")
 
