@@ -13,3 +13,4 @@ from .attendance_record import (
     AttendanceRecordUpdate,
     AttendanceCheckIn,
 )
+from .dashboard import AdminDashboard, LecturerDashboard, StudentDashboard
