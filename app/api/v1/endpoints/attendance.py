@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import crud, schemas
@@ -139,9 +140,29 @@ def check_in(
         longitude=payload.longitude,
         status="PRESENT",
     )
-    db.add(record)
-    db.commit()
-    db.refresh(record)
+    try:
+        db.add(record)
+        db.commit()
+        db.refresh(record)
+    except IntegrityError:
+        db.rollback()
+        existing = crud.attendance_record.get_by_session_and_student(
+            db, session_id=session.id, student_id=student.user_id
+        )
+        if existing:
+            logger.warning(
+                f"Check-in failed for student {student.user_id}: Already checked in to session {session.id} (concurrency match)",
+                extra={
+                    "student_id": student.user_id,
+                    "session_id": session.id,
+                    "session_code": payload.session_code,
+                    "latitude": payload.latitude,
+                    "longitude": payload.longitude,
+                    "validation_outcome": "ALREADY_CHECKED_IN"
+                }
+            )
+            raise HTTPException(status_code=400, detail="You have already checked in to this session.")
+        raise
 
     logger.info(
         f"Check-in successful for student {student.user_id} on session {session.id}",

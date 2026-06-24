@@ -20,6 +20,8 @@ class LecturerActiveSession(BaseModel):
     course_title: str
     session_code: str
     expires_at: datetime
+    geofencing_enabled: bool
+    radius_meters: int | None = None
 
 
 class LecturerCourse(BaseModel):

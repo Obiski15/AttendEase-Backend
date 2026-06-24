@@ -98,9 +98,10 @@ class CRUDAttendanceSession(
         return db_obj
 
     def is_open(self, session: AttendanceSession) -> bool:
-        return session.status == "ACTIVE" and session.expires_at > datetime.now(
-            timezone.utc
-        )
+        expires_at = session.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        return session.status == "ACTIVE" and expires_at > datetime.now(timezone.utc)
 
     def close(self, db: Session, *, db_obj: AttendanceSession) -> AttendanceSession:
         db_obj.status = "COMPLETED"

@@ -50,6 +50,8 @@ def lecturer_dashboard(db: Session, *, lecturer_id: UUID, full_name: str) -> dic
             Course.title,
             AttendanceSession.session_code,
             AttendanceSession.expires_at,
+            AttendanceSession.geofencing_enabled,
+            AttendanceSession.radius_meters,
         )
         .join(CourseAssignment, AttendanceSession.course_assignment_id == CourseAssignment.id)
         .join(Course, CourseAssignment.course_id == Course.id)
@@ -84,6 +86,8 @@ def lecturer_dashboard(db: Session, *, lecturer_id: UUID, full_name: str) -> dic
                 "course_title": r.title,
                 "session_code": r.session_code,
                 "expires_at": r.expires_at,
+                "geofencing_enabled": r.geofencing_enabled,
+                "radius_meters": r.radius_meters,
             }
             for r in active_rows
         ],
