@@ -39,7 +39,10 @@ def create_academic_session(
     _: User = Depends(deps.require_admin),
 ) -> Any:
     """Create an academic session. Admin only."""
-    return crud.academic_session.create(db=db, obj_in=session_in)
+    try:
+        return crud.academic_session.create(db=db, obj_in=session_in)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.get(
@@ -74,7 +77,10 @@ def update_academic_session(
     session = crud.academic_session.get(db=db, id=session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Academic session not found")
-    return crud.academic_session.update(db=db, db_obj=session, obj_in=session_in)
+    try:
+        return crud.academic_session.update(db=db, db_obj=session, obj_in=session_in)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.post(
@@ -92,7 +98,10 @@ def activate_academic_session(
     session = crud.academic_session.get(db=db, id=session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Academic session not found")
-    return crud.academic_session.activate(db=db, db_obj=session)
+    try:
+        return crud.academic_session.activate(db=db, db_obj=session)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.delete(

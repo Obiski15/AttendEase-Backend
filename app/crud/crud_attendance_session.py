@@ -47,6 +47,25 @@ class CRUDAttendanceSession(
             .all()
         )
 
+    def get_multi_by_lecturer(
+        self,
+        db: Session,
+        *,
+        lecturer_id: UUID,
+        skip: int = 0,
+        limit: int = 100
+    ) -> List[AttendanceSession]:
+        from app.models.course_assignment import CourseAssignment
+        return (
+            db.query(AttendanceSession)
+            .join(CourseAssignment, AttendanceSession.course_assignment_id == CourseAssignment.id)
+            .filter(CourseAssignment.lecturer_id == lecturer_id)
+            .order_by(AttendanceSession.start_time.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
     def open_session(
         self, db: Session, *, obj_in: AttendanceSessionCreate
     ) -> AttendanceSession:
@@ -68,6 +87,10 @@ class CRUDAttendanceSession(
             expires_at=expires_at,
             session_code=code,
             status="ACTIVE",
+            geofencing_enabled=obj_in.geofencing_enabled or False,
+            latitude=obj_in.latitude,
+            longitude=obj_in.longitude,
+            radius_meters=obj_in.radius_meters or 50,
         )
         db.add(db_obj)
         db.commit()

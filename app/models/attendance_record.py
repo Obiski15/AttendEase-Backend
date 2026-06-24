@@ -22,6 +22,8 @@ class AttendanceRecord(Base):
     session_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("attendance_sessions.id"))
     student_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("students.user_id"))
     check_in_time: Mapped[datetime] = mapped_column()
+    latitude: Mapped[Optional[float]] = mapped_column(nullable=True)
+    longitude: Mapped[Optional[float]] = mapped_column(nullable=True)
     status: Mapped[str] = mapped_column(String, default="PRESENT")
     created_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())
 

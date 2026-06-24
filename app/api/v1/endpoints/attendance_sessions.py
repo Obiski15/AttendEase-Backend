@@ -42,6 +42,23 @@ def open_attendance_session(
         raise HTTPException(status_code=404, detail="Course assignment not found.")
     if current_user.role == "LECTURER" and assignment.lecturer_id != current_user.id:
         raise HTTPException(status_code=403, detail="You are not assigned to this course.")
+
+    academic_session = crud.academic_session.get(db, id=assignment.academic_session_id)
+    if not academic_session:
+        raise HTTPException(status_code=404, detail="Academic session linked to assignment not found.")
+    if not academic_session.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot open attendance session. The academic session is not active."
+        )
+
+    from datetime import date
+    today = date.today()
+    if academic_session.start_date and today < academic_session.start_date:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot open attendance session. The academic session has not started yet.")
+    if academic_session.end_date and today > academic_session.end_date:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot open attendance session. The academic session has already ended.")
+
     return crud.attendance_session.open_session(db=db, obj_in=session_in)
 
 
@@ -71,9 +88,8 @@ def read_attendance_sessions(
             db, course_assignment_id=course_assignment_id, skip=skip, limit=limit
         )
     if current_user.role == "LECTURER":
-        raise HTTPException(
-            status_code=400,
-            detail="Lecturers must provide a course_assignment_id.",
+        return crud.attendance_session.get_multi_by_lecturer(
+            db, lecturer_id=current_user.id, skip=skip, limit=limit
         )
     return crud.attendance_session.get_multi(db, skip=skip, limit=limit)
 

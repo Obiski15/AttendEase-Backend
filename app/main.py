@@ -3,6 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.api import api_router
 from app.core.config import settings
+from app.core.logging import setup_logging
+from app.middleware.logging_middleware import LoggingMiddleware
+
+# Initialize structured logging
+setup_logging()
 
 # This automatically creates tables if they don't exist
 from app.db.session import engine
@@ -49,6 +54,8 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_tags=tags_metadata,
 )
+
+app.add_middleware(LoggingMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

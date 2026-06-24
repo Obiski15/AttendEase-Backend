@@ -49,8 +49,22 @@ def create_course_assignment(
         raise HTTPException(status_code=404, detail="Course not found.")
     if not crud.lecturer.get(db, assignment_in.lecturer_id):
         raise HTTPException(status_code=404, detail="Lecturer not found.")
-    if not crud.academic_session.get(db, id=assignment_in.academic_session_id):
+    academic_session = crud.academic_session.get(db, id=assignment_in.academic_session_id)
+    if not academic_session:
         raise HTTPException(status_code=404, detail="Academic session not found.")
+    if not academic_session.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot assign course. The selected academic session is not active."
+        )
+    
+    from datetime import date
+    today = date.today()
+    if academic_session.start_date and today < academic_session.start_date:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot assign course. The academic session has not started yet.")
+    if academic_session.end_date and today > academic_session.end_date:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot assign course. The academic session has already ended.")
+
     return crud.course_assignment.create(db=db, obj_in=assignment_in)
 
 
