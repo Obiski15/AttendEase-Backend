@@ -26,6 +26,6 @@ class TokenRefresh(BaseModel):
 
 class LoginPayload(BaseModel):
     """Body for logging in."""
-    
+
     email: str
     password: str

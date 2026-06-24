@@ -33,3 +33,14 @@ class User(UserBase):
     updated_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
+
+
+class PasswordUpdate(BaseModel):
+    old_password: str
+    new_password: str
+
+
+class ProfileUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    profile_image_url: Optional[str] = None

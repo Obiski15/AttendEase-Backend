@@ -1,5 +1,5 @@
 from .token import Token, TokenRefresh, LoginPayload, LoginResponse
-from .user import User, UserCreate, UserUpdate
+from .user import User, UserCreate, UserUpdate, PasswordUpdate, ProfileUpdate
 from .department import Department, DepartmentCreate, DepartmentUpdate
 from .student import Student, StudentCreate, StudentRegister, StudentUpdate
 from .lecturer import Lecturer, LecturerCreate, LecturerUpdate

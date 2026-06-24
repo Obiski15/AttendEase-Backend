@@ -10,6 +10,7 @@ from app.core.security import (
     create_access_token,
     create_refresh_token,
     decode_token,
+    verify_password,
 )
 from app.models.user import User
 
@@ -117,3 +118,44 @@ def read_me(
 ) -> Any:
     """Return the profile of the currently authenticated user."""
     return current_user
+
+
+@router.patch(
+    "/me",
+    response_model=schemas.User,
+    summary="Update current logged-in user profile",
+)
+def update_me(
+    *,
+    db: Session = Depends(deps.get_db),
+    body: schemas.ProfileUpdate,
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """Update name, email, etc. for the logged-in user."""
+    if body.email and body.email != current_user.email:
+        existing_user = crud.user.get_by_email(db, email=body.email)
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A user with this email already exists."
+            )
+    return crud.user.update(db, db_obj=current_user, obj_in=body)
+
+
+@router.post(
+    "/change-password",
+    summary="Change the current user's password",
+)
+def change_password(
+    body: schemas.PasswordUpdate,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """Update password for the logged-in user."""
+    if not verify_password(body.old_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect old password",
+        )
+    crud.user.update(db, db_obj=current_user, obj_in={"password": body.new_password})
+    return {"message": "Password updated successfully"}
