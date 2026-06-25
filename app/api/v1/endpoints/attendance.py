@@ -19,8 +19,9 @@ logger = logging.getLogger(__name__)
 
 
 @router.post(
-    "/check-in",  
-    status_code=201,
+    "/check-in",
+    response_model=schemas.AttendanceRecord,
+    status_code=status.HTTP_201_CREATED,
     summary="Submit a student check-in",
     description=(
         "Validates a student's check-in attempt using their current GPS location and the session code. "
@@ -33,9 +34,9 @@ logger = logging.getLogger(__name__)
         },
         400: {
             "description": (
-                "Bad Request - Validation failed. Potential reasons: "
-                "1. The attendance session has expired or is inactive. "
-                "2. The student is outside the allowed geofenced radius. "
+                "Bad Request - Validation failed. Potential reasons: \n"
+                "1. The attendance session has expired or is inactive. \n"
+                "2. The student is outside the allowed geofenced radius. \n"
                 "3. The student does not belong to the correct department for this course."
             )
         },

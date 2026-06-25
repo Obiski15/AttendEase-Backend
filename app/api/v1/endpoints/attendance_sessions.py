@@ -134,7 +134,7 @@ def read_attendance_session(
 
 
 @router.post(
-    "/",
+    "/{session_id}/close",
     status_code=201,
     summary="Open a new attendance session",
     description=(

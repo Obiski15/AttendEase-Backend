@@ -13,7 +13,7 @@ setup_logging()
 
 # This automatically creates tables if they don't exist
 
-Base.metadata.create_all(bind=engine)
+#Base.metadata.create_all(bind=engine)
 
 description = "Backend API for the AttendEase attendance management system"
 
