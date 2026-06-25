@@ -8,3 +8,5 @@ email-validator
 pyjwt
 bcrypt
 python-multipart
+websockets
+requests
