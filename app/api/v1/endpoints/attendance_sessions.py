@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List, Optional
 from uuid import UUID
 
@@ -10,6 +11,7 @@ from app.models.attendance_session import AttendanceSession
 from app.models.user import User
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 def _assert_can_manage(db: Session, session: AttendanceSession, user: User) -> None:
@@ -19,6 +21,7 @@ def _assert_can_manage(db: Session, session: AttendanceSession, user: User) -> N
     assignment = crud.course_assignment.get(db, id=session.course_assignment_id)
     if user.role == "LECTURER" and assignment and assignment.lecturer_id == user.id:
         return
+    logger.warning(f"User {user.id} denied manage access for session {session.id}", extra={"user_id": user.id, "session_id": session.id, "action": "manage_session_denied"})
     raise HTTPException(
         status_code=403, detail="Not enough privileges for this session."
     )
@@ -72,7 +75,9 @@ def open_attendance_session(
             detail="Cannot open attendance session. The academic session has already ended.",
         )
 
-    return crud.attendance_session.open_session(db=db, obj_in=session_in)
+    opened_session = crud.attendance_session.open_session(db=db, obj_in=session_in)
+    logger.info(f"Attendance session {opened_session.id} opened", extra={"session_id": opened_session.id, "course_assignment_id": session_in.course_assignment_id, "action": "open_attendance_session"})
+    return opened_session
 
 
 @router.get(
@@ -144,7 +149,9 @@ def close_attendance_session(
     if not session:
         raise HTTPException(status_code=404, detail="Attendance session not found")
     _assert_can_manage(db, session, current_user)
-    return crud.attendance_session.close(db=db, db_obj=session)
+    closed_session = crud.attendance_session.close(db=db, db_obj=session)
+    logger.info(f"Attendance session {session_id} closed manually", extra={"session_id": session_id, "action": "close_attendance_session_manual"})
+    return closed_session
 
 
 @router.get(

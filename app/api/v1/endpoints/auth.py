@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -15,6 +16,7 @@ from app.core.security import (
 from app.models.user import User
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 def _build_login_response(user: User) -> schemas.LoginResponse:
@@ -41,16 +43,19 @@ def login(
     """
     user = crud.user.authenticate(db, email=payload.email, password=payload.password)
     if not user:
+        logger.warning(f"Login failed: Incorrect email or password for {payload.email}", extra={"email": payload.email, "action": "login_failed_credentials"})
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
         )
     if not crud.user.is_active(user):
+        logger.warning(f"Login failed: Inactive user {payload.email}", extra={"email": payload.email, "user_id": user.id, "action": "login_failed_inactive"})
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user"
         )
 
     crud.user.touch_last_login(db, user=user)
+    logger.info(f"Login successful for user {user.id}", extra={"email": user.email, "user_id": user.id, "action": "login_success"})
     return _build_login_response(user)
 
 
@@ -77,8 +82,10 @@ def refresh_token(
 
     user = crud.user.get(db, id=payload.get("sub"))
     if user is None or not crud.user.is_active(user):
+        logger.warning("Token refresh failed: User not found or inactive", extra={"action": "refresh_failed_user"})
         raise invalid
 
+    logger.info(f"Token refreshed for user {user.id}", extra={"user_id": user.id, "action": "refresh_success"})
     return _build_login_response(user)
 
 
@@ -105,6 +112,7 @@ def register(
         raise HTTPException(status_code=404, detail="Department not found.")
 
     student = crud.student.create_with_user(db, obj_in=body)
+    logger.info(f"New student registered: {student.user_id}", extra={"user_id": student.user_id, "email": body.email, "matric_number": body.matric_number, "action": "register_student"})
     return _build_login_response(student.user)
 
 
@@ -139,7 +147,9 @@ def update_me(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="A user with this email already exists.",
             )
-    return crud.user.update(db, db_obj=current_user, obj_in=body)
+    updated_user = crud.user.update(db, db_obj=current_user, obj_in=body)
+    logger.info(f"User {current_user.id} updated profile", extra={"user_id": current_user.id, "action": "update_profile"})
+    return updated_user
 
 
 @router.post(
@@ -153,9 +163,11 @@ def change_password(
 ) -> Any:
     """Update password for the logged-in user."""
     if not verify_password(body.old_password, current_user.password_hash):
+        logger.warning(f"Password change failed for user {current_user.id}", extra={"user_id": current_user.id, "action": "password_change_failed"})
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect old password",
         )
     crud.user.update(db, db_obj=current_user, obj_in={"password": body.new_password})
+    logger.info(f"Password changed for user {current_user.id}", extra={"user_id": current_user.id, "action": "password_change_success"})
     return {"message": "Password updated successfully"}

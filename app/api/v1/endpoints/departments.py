@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List
 from uuid import UUID
 
@@ -9,6 +10,7 @@ from app.api import deps
 from app.models.user import User
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("/", response_model=List[schemas.Department], summary="List departments")
@@ -39,7 +41,9 @@ def create_department(
         raise HTTPException(
             status_code=400, detail="A department with this name already exists."
         )
-    return crud.department.create(db=db, obj_in=department_in)
+    department = crud.department.create(db=db, obj_in=department_in)
+    logger.info(f"Department {department.id} created", extra={"department_id": department.id, "name": department.name, "action": "create_department"})
+    return department
 
 
 @router.get(
@@ -72,7 +76,9 @@ def update_department(
     department = crud.department.get(db=db, id=department_id)
     if not department:
         raise HTTPException(status_code=404, detail="Department not found")
-    return crud.department.update(db=db, db_obj=department, obj_in=department_in)
+    updated_department = crud.department.update(db=db, db_obj=department, obj_in=department_in)
+    logger.info(f"Department {department_id} updated", extra={"department_id": department_id, "action": "update_department"})
+    return updated_department
 
 
 @router.delete(
@@ -89,4 +95,6 @@ def delete_department(
     department = crud.department.get(db=db, id=department_id)
     if not department:
         raise HTTPException(status_code=404, detail="Department not found")
-    return crud.department.remove(db=db, id=department_id)
+    deleted_department = crud.department.remove(db=db, id=department_id)
+    logger.info(f"Department {department_id} deleted", extra={"department_id": department_id, "action": "delete_department"})
+    return deleted_department

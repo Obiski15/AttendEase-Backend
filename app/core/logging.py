@@ -30,6 +30,9 @@ class JSONFormatter(logging.Formatter):
         }
         if record.exc_info:
             log_data["exception"] = self.formatException(record.exc_info)
+            
+        from app.core.context import client_ip_var
+        log_data["ip_address"] = client_ip_var.get()
 
         # Capture custom extra parameters passed in logger calls
         standard_attrs = {

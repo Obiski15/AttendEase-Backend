@@ -11,6 +11,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         start_time = time.perf_counter()
 
         client_host = request.client.host if request.client else "unknown"
+        from app.core.context import client_ip_var
+        client_ip_var.set(client_host)
+        
         method = request.method
         url = str(request.url)
 

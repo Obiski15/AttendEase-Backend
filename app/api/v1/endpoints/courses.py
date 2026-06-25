@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List
 from uuid import UUID
 
@@ -9,6 +10,7 @@ from app.api import deps
 from app.models.user import User
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("/", response_model=List[schemas.Course], summary="List courses")
@@ -41,7 +43,9 @@ def create_course(
         )
     if not crud.department.get(db, id=course_in.department_id):
         raise HTTPException(status_code=404, detail="Department not found.")
-    return crud.course.create(db=db, obj_in=course_in)
+    course = crud.course.create(db=db, obj_in=course_in)
+    logger.info(f"Course {course.id} created", extra={"course_id": course.id, "course_code": course.course_code, "department_id": course.department_id, "action": "create_course"})
+    return course
 
 
 @router.get("/{course_id}", response_model=schemas.Course, summary="Get a course")
@@ -72,7 +76,9 @@ def update_course(
     course = crud.course.get(db=db, id=course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
-    return crud.course.update(db=db, db_obj=course, obj_in=course_in)
+    updated_course = crud.course.update(db=db, db_obj=course, obj_in=course_in)
+    logger.info(f"Course {course_id} updated", extra={"course_id": course_id, "action": "update_course"})
+    return updated_course
 
 
 @router.delete(
@@ -89,4 +95,6 @@ def delete_course(
     course = crud.course.get(db=db, id=course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
-    return crud.course.remove(db=db, id=course_id)
+    deleted_course = crud.course.remove(db=db, id=course_id)
+    logger.info(f"Course {course_id} deleted", extra={"course_id": course_id, "action": "delete_course"})
+    return deleted_course

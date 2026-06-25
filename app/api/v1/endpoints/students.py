@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List
 from uuid import UUID
 
@@ -9,6 +10,7 @@ from app.api import deps
 from app.models.user import User
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get(
@@ -49,7 +51,9 @@ def create_student(
         )
     if not crud.department.get(db, id=student_in.department_id):
         raise HTTPException(status_code=404, detail="Department not found.")
-    return crud.student.create_with_user(db=db, obj_in=student_in)
+    student = crud.student.create_with_user(db=db, obj_in=student_in)
+    logger.info(f"Student {student.user_id} created by admin", extra={"target_user_id": student.user_id, "matric_number": student.matric_number, "action": "create_student"})
+    return student
 
 
 @router.get(
@@ -87,7 +91,9 @@ def update_student(
     student = crud.student.get(db, user_id)
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
-    return crud.student.update(db=db, db_obj=student, obj_in=student_in)
+    updated_student = crud.student.update(db=db, db_obj=student, obj_in=student_in)
+    logger.info(f"Student {user_id} updated by admin", extra={"target_user_id": user_id, "action": "update_student_admin"})
+    return updated_student
 
 
 @router.delete(
@@ -106,3 +112,4 @@ def delete_student(
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
     crud.student.remove(db=db, user_id=user_id)
+    logger.info(f"Student {user_id} deleted by admin", extra={"target_user_id": user_id, "action": "delete_student"})

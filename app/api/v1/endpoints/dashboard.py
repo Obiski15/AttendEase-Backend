@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -9,6 +10,7 @@ from app.crud import crud_dashboard
 from app.models.user import User
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get(
@@ -51,6 +53,7 @@ def student_dashboard(
     """Attendance percentage and recent check-ins for the logged-in student."""
     student = crud.student.get(db, current_user.id)
     if not student:
+        logger.error(f"Student profile missing for user {current_user.id}", extra={"user_id": current_user.id, "action": "dashboard_student_missing"})
         raise HTTPException(status_code=404, detail="Student profile not found.")
     return crud_dashboard.student_dashboard(
         db, student_id=current_user.id, full_name=current_user.full_name

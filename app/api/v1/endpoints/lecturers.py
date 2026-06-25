@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List
 from uuid import UUID
 
@@ -9,6 +10,7 @@ from app.api import deps
 from app.models.user import User
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get(
@@ -49,7 +51,9 @@ def create_lecturer(
         )
     if not crud.department.get(db, id=lecturer_in.department_id):
         raise HTTPException(status_code=404, detail="Department not found.")
-    return crud.lecturer.create_with_user(db=db, obj_in=lecturer_in)
+    lecturer = crud.lecturer.create_with_user(db=db, obj_in=lecturer_in)
+    logger.info(f"Lecturer {lecturer.user_id} created by admin", extra={"target_user_id": lecturer.user_id, "staff_id": lecturer.staff_id, "action": "create_lecturer"})
+    return lecturer
 
 
 @router.get(
@@ -87,7 +91,9 @@ def update_lecturer(
     lecturer = crud.lecturer.get(db, user_id)
     if not lecturer:
         raise HTTPException(status_code=404, detail="Lecturer not found")
-    return crud.lecturer.update(db=db, db_obj=lecturer, obj_in=lecturer_in)
+    updated_lecturer = crud.lecturer.update(db=db, db_obj=lecturer, obj_in=lecturer_in)
+    logger.info(f"Lecturer {user_id} updated by admin", extra={"target_user_id": user_id, "action": "update_lecturer_admin"})
+    return updated_lecturer
 
 
 @router.delete(
@@ -106,3 +112,4 @@ def delete_lecturer(
     if not lecturer:
         raise HTTPException(status_code=404, detail="Lecturer not found")
     crud.lecturer.remove(db=db, user_id=user_id)
+    logger.info(f"Lecturer {user_id} deleted by admin", extra={"target_user_id": user_id, "action": "delete_lecturer"})

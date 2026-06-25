@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List
 from uuid import UUID
 
@@ -9,6 +10,7 @@ from app.api import deps
 from app.models.user import User
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get(
@@ -40,7 +42,9 @@ def create_academic_session(
 ) -> Any:
     """Create an academic session. Admin only."""
     try:
-        return crud.academic_session.create(db=db, obj_in=session_in)
+        session = crud.academic_session.create(db=db, obj_in=session_in)
+        logger.info(f"Academic session {session.id} created", extra={"session_id": session.id, "name": session.name, "action": "create_academic_session"})
+        return session
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
@@ -78,7 +82,9 @@ def update_academic_session(
     if not session:
         raise HTTPException(status_code=404, detail="Academic session not found")
     try:
-        return crud.academic_session.update(db=db, db_obj=session, obj_in=session_in)
+        updated_session = crud.academic_session.update(db=db, db_obj=session, obj_in=session_in)
+        logger.info(f"Academic session {session_id} updated", extra={"session_id": session_id, "action": "update_academic_session"})
+        return updated_session
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
@@ -99,7 +105,9 @@ def activate_academic_session(
     if not session:
         raise HTTPException(status_code=404, detail="Academic session not found")
     try:
-        return crud.academic_session.activate(db=db, db_obj=session)
+        activated_session = crud.academic_session.activate(db=db, db_obj=session)
+        logger.info(f"Academic session {session_id} activated", extra={"session_id": session_id, "action": "activate_academic_session"})
+        return activated_session
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
@@ -118,4 +126,6 @@ def delete_academic_session(
     session = crud.academic_session.get(db=db, id=session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Academic session not found")
-    return crud.academic_session.remove(db=db, id=session_id)
+    deleted_session = crud.academic_session.remove(db=db, id=session_id)
+    logger.info(f"Academic session {session_id} deleted", extra={"session_id": session_id, "action": "delete_academic_session"})
+    return deleted_session

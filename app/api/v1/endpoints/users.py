@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List
 from uuid import UUID
 
@@ -9,6 +10,7 @@ from app.api import deps
 from app.models.user import User
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get(
@@ -43,7 +45,17 @@ def create_user(
         raise HTTPException(
             status_code=400, detail="The user with this email already exists."
         )
-    return crud.user.create(db=db, obj_in=user_in)
+    user = crud.user.create(db=db, obj_in=user_in)
+    logger.info(
+        f"User {user.id} created by admin",
+        extra={
+            "target_user_id": user.id,
+            "email": user.email,
+            "role": user.role,
+            "action": "create_user",
+        },
+    )
+    return user
 
 
 @router.get(
@@ -80,7 +92,12 @@ def update_user(
     user = crud.user.get(db=db, id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return crud.user.update(db=db, db_obj=user, obj_in=user_in)
+    updated_user = crud.user.update(db=db, db_obj=user, obj_in=user_in)
+    logger.info(
+        f"User {user_id} updated by admin",
+        extra={"target_user_id": user_id, "action": "update_user_admin"},
+    )
+    return updated_user
 
 
 @router.delete(
@@ -98,4 +115,9 @@ def delete_user(
     user = crud.user.get(db=db, id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return crud.user.soft_delete(db=db, user=user)
+    deleted_user = crud.user.soft_delete(db=db, user=user)
+    logger.info(
+        f"User {user_id} soft-deleted by admin",
+        extra={"target_user_id": user_id, "action": "delete_user"},
+    )
+    return deleted_user

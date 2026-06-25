@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List
 from uuid import UUID
 
@@ -9,6 +10,7 @@ from app.api import deps
 from app.models.user import User
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get(
@@ -74,7 +76,9 @@ def create_course_assignment(
             detail="Cannot assign course. The academic session has already ended.",
         )
 
-    return crud.course_assignment.create(db=db, obj_in=assignment_in)
+    assignment = crud.course_assignment.create(db=db, obj_in=assignment_in)
+    logger.info(f"Course {assignment.course_id} assigned to lecturer {assignment.lecturer_id}", extra={"assignment_id": assignment.id, "course_id": assignment.course_id, "lecturer_id": assignment.lecturer_id, "action": "create_course_assignment"})
+    return assignment
 
 
 @router.get(
@@ -112,4 +116,6 @@ def delete_course_assignment(
     assignment = crud.course_assignment.get(db=db, id=assignment_id)
     if not assignment:
         raise HTTPException(status_code=404, detail="Course assignment not found")
-    return crud.course_assignment.remove(db=db, id=assignment_id)
+    deleted_assignment = crud.course_assignment.remove(db=db, id=assignment_id)
+    logger.info(f"Course assignment {assignment_id} deleted", extra={"assignment_id": assignment_id, "action": "delete_course_assignment"})
+    return deleted_assignment
