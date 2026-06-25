@@ -40,9 +40,13 @@ def create_lecturer(
 ) -> Any:
     """Provision a lecturer account + profile. Admin only."""
     if crud.user.get_by_email(db, email=lecturer_in.email):
-        raise HTTPException(status_code=400, detail="A user with this email already exists.")
+        raise HTTPException(
+            status_code=400, detail="A user with this email already exists."
+        )
     if crud.lecturer.get_by_staff_id(db, staff_id=lecturer_in.staff_id):
-        raise HTTPException(status_code=400, detail="This staff ID is already registered.")
+        raise HTTPException(
+            status_code=400, detail="This staff ID is already registered."
+        )
     if not crud.department.get(db, id=lecturer_in.department_id):
         raise HTTPException(status_code=404, detail="Department not found.")
     return crud.lecturer.create_with_user(db=db, obj_in=lecturer_in)

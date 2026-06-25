@@ -34,10 +34,16 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         db_obj: User,
         obj_in: Union[UserUpdate, Dict[str, Any]],
     ) -> User:
-        update_data = obj_in if isinstance(obj_in, dict) else obj_in.model_dump(exclude_unset=True)
+        update_data = (
+            obj_in
+            if isinstance(obj_in, dict)
+            else obj_in.model_dump(exclude_unset=True)
+        )
         # Hash a new password if one was supplied, never store it raw.
         if update_data.get("password"):
-            update_data["password_hash"] = get_password_hash(update_data.pop("password"))
+            update_data["password_hash"] = get_password_hash(
+                update_data.pop("password")
+            )
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
     def authenticate(self, db: Session, *, email: str, password: str) -> Optional[User]:

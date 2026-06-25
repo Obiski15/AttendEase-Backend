@@ -40,9 +40,13 @@ def create_student(
 ) -> Any:
     """Provision a student account + profile. Admin only."""
     if crud.user.get_by_email(db, email=student_in.email):
-        raise HTTPException(status_code=400, detail="A user with this email already exists.")
+        raise HTTPException(
+            status_code=400, detail="A user with this email already exists."
+        )
     if crud.student.get_by_matric(db, matric_number=student_in.matric_number):
-        raise HTTPException(status_code=400, detail="This matric number is already registered.")
+        raise HTTPException(
+            status_code=400, detail="This matric number is already registered."
+        )
     if not crud.department.get(db, id=student_in.department_id):
         raise HTTPException(status_code=404, detail="Department not found.")
     return crud.student.create_with_user(db=db, obj_in=student_in)

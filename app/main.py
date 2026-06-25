@@ -4,14 +4,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.logging import setup_logging
+from app.db.base import Base
+from app.db.session import engine
 from app.middleware.logging_middleware import LoggingMiddleware
 
 # Initialize structured logging
 setup_logging()
 
 # This automatically creates tables if they don't exist
-from app.db.session import engine
-from app.db.base import Base
 
 Base.metadata.create_all(bind=engine)
 

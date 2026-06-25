@@ -20,11 +20,19 @@ class CourseAssignment(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     course_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("courses.id"))
     lecturer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("lecturers.user_id"))
-    academic_session_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("academic_sessions.id"))
+    academic_session_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("academic_sessions.id")
+    )
     created_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())
-    updated_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(
+        server_default=func.now(), onupdate=func.now()
+    )
 
     course: Mapped["Course"] = relationship(back_populates="course_assignments")
     lecturer: Mapped["Lecturer"] = relationship(back_populates="course_assignments")
-    academic_session: Mapped["AcademicSession"] = relationship(back_populates="course_assignments")
-    attendance_sessions: Mapped[List["AttendanceSession"]] = relationship(back_populates="course_assignment")
+    academic_session: Mapped["AcademicSession"] = relationship(
+        back_populates="course_assignments"
+    )
+    attendance_sessions: Mapped[List["AttendanceSession"]] = relationship(
+        back_populates="course_assignment"
+    )

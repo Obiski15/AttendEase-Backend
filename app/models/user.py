@@ -24,7 +24,9 @@ class User(Base):
     profile_image_url: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     last_login: Mapped[Optional[datetime]] = mapped_column(nullable=True)
     created_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())
-    updated_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(
+        server_default=func.now(), onupdate=func.now()
+    )
     deleted_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
 
     student_profile: Mapped[Optional["Student"]] = relationship(

@@ -18,10 +18,14 @@ class CRUDStudent(CRUDBase[Student, StudentCreate, StudentUpdate]):
     def get_by_matric(self, db: Session, *, matric_number: str) -> Optional[Student]:
         return db.query(Student).filter(Student.matric_number == matric_number).first()
 
-    def get_multi(self, db: Session, *, skip: int = 0, limit: int = 100) -> List[Student]:
+    def get_multi(
+        self, db: Session, *, skip: int = 0, limit: int = 100
+    ) -> List[Student]:
         return db.query(Student).offset(skip).limit(limit).all()
 
-    def create_with_user(self, db: Session, *, obj_in: Union[StudentCreate, Any]) -> Student:
+    def create_with_user(
+        self, db: Session, *, obj_in: Union[StudentCreate, Any]
+    ) -> Student:
         """Provision the User account and the Student profile together."""
         user = User(
             email=obj_in.email,

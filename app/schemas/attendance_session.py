@@ -30,12 +30,24 @@ class AttendanceSessionCreate(BaseModel):
     session_date: Optional[date] = Field(default=None, description="Defaults to today.")
     start_time: Optional[datetime] = None
     expires_at: Optional[datetime] = None
-    duration_minutes: Optional[int] = Field(default=60, ge=1, description="Used when expires_at is not given.")
-    session_code: Optional[str] = Field(default=None, description="Auto-generated if omitted.")
-    geofencing_enabled: Optional[bool] = Field(default=False, description="Enable geofencing for this session.")
-    latitude: Optional[float] = Field(default=None, description="Center latitude of the geofence.")
-    longitude: Optional[float] = Field(default=None, description="Center longitude of the geofence.")
-    radius_meters: Optional[int] = Field(default=50, ge=5, description="Allowed radius in meters.")
+    duration_minutes: Optional[int] = Field(
+        default=60, ge=1, description="Used when expires_at is not given."
+    )
+    session_code: Optional[str] = Field(
+        default=None, description="Auto-generated if omitted."
+    )
+    geofencing_enabled: Optional[bool] = Field(
+        default=False, description="Enable geofencing for this session."
+    )
+    latitude: Optional[float] = Field(
+        default=None, description="Center latitude of the geofence."
+    )
+    longitude: Optional[float] = Field(
+        default=None, description="Center longitude of the geofence."
+    )
+    radius_meters: Optional[int] = Field(
+        default=50, ge=5, description="Allowed radius in meters."
+    )
 
 
 class AttendanceSessionUpdate(BaseModel):

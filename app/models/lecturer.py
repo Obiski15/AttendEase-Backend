@@ -22,8 +22,12 @@ class Lecturer(Base):
     staff_id: Mapped[str] = mapped_column(String, unique=True)
     department_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("departments.id"))
     created_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())
-    updated_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(
+        server_default=func.now(), onupdate=func.now()
+    )
 
     user: Mapped["User"] = relationship(back_populates="lecturer_profile")
     department: Mapped["Department"] = relationship(back_populates="lecturers")
-    course_assignments: Mapped[List["CourseAssignment"]] = relationship(back_populates="lecturer")
+    course_assignments: Mapped[List["CourseAssignment"]] = relationship(
+        back_populates="lecturer"
+    )

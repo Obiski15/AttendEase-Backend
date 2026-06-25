@@ -21,7 +21,10 @@ class AcademicSession(Base):
     start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     created_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())
-    updated_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(
+        server_default=func.now(), onupdate=func.now()
+    )
 
-    course_assignments: Mapped[List["CourseAssignment"]] = relationship(back_populates="academic_session")
-
+    course_assignments: Mapped[List["CourseAssignment"]] = relationship(
+        back_populates="academic_session"
+    )

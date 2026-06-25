@@ -21,8 +21,12 @@ class Course(Base):
     credit_units: Mapped[int] = mapped_column(Integer)
     department_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("departments.id"))
     created_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())
-    updated_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(
+        server_default=func.now(), onupdate=func.now()
+    )
     deleted_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
 
     department: Mapped["Department"] = relationship(back_populates="courses")
-    course_assignments: Mapped[List["CourseAssignment"]] = relationship(back_populates="course")
+    course_assignments: Mapped[List["CourseAssignment"]] = relationship(
+        back_populates="course"
+    )

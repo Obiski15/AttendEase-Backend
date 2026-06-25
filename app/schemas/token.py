@@ -6,8 +6,12 @@ from app.schemas.user import User
 class Token(BaseModel):
     """Token pair returned on login, register or refresh."""
 
-    access_token: str = Field(..., description="Short-lived token sent on every request.")
-    refresh_token: str = Field(..., description="Long-lived token used to get new access tokens.")
+    access_token: str = Field(
+        ..., description="Short-lived token sent on every request."
+    )
+    refresh_token: str = Field(
+        ..., description="Long-lived token used to get new access tokens."
+    )
 
 
 class LoginResponse(BaseModel):

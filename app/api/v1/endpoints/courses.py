@@ -36,7 +36,9 @@ def create_course(
 ) -> Any:
     """Create a course. Admin only."""
     if crud.course.get_by_code(db, course_code=course_in.course_code):
-        raise HTTPException(status_code=400, detail="A course with this code already exists.")
+        raise HTTPException(
+            status_code=400, detail="A course with this code already exists."
+        )
     if not crud.department.get(db, id=course_in.department_id):
         raise HTTPException(status_code=404, detail="Department not found.")
     return crud.course.create(db=db, obj_in=course_in)

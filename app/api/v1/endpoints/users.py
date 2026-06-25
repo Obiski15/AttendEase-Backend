@@ -40,7 +40,9 @@ def create_user(
 ) -> Any:
     """Create a new user with an explicit role (e.g. another ADMIN). Admin only."""
     if crud.user.get_by_email(db, email=user_in.email):
-        raise HTTPException(status_code=400, detail="The user with this email already exists.")
+        raise HTTPException(
+            status_code=400, detail="The user with this email already exists."
+        )
     return crud.user.create(db=db, obj_in=user_in)
 
 

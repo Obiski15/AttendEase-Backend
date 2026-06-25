@@ -27,5 +27,7 @@ class AttendanceRecord(Base):
     status: Mapped[str] = mapped_column(String, default="PRESENT")
     created_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())
 
-    attendance_session: Mapped["AttendanceSession"] = relationship(back_populates="attendance_records")
+    attendance_session: Mapped["AttendanceSession"] = relationship(
+        back_populates="attendance_records"
+    )
     student: Mapped["Student"] = relationship(back_populates="attendance_records")

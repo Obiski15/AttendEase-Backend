@@ -36,11 +36,15 @@ def create_department(
 ) -> Any:
     """Create a department. Admin only."""
     if crud.department.get_by_name(db, name=department_in.name):
-        raise HTTPException(status_code=400, detail="A department with this name already exists.")
+        raise HTTPException(
+            status_code=400, detail="A department with this name already exists."
+        )
     return crud.department.create(db=db, obj_in=department_in)
 
 
-@router.get("/{department_id}", response_model=schemas.Department, summary="Get a department")
+@router.get(
+    "/{department_id}", response_model=schemas.Department, summary="Get a department"
+)
 def read_department(
     *,
     db: Session = Depends(deps.get_db),

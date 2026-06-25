@@ -137,7 +137,7 @@ def update_me(
         if existing_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="A user with this email already exists."
+                detail="A user with this email already exists.",
             )
     return crud.user.update(db, db_obj=current_user, obj_in=body)
 

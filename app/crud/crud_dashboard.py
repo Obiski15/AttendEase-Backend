@@ -39,7 +39,10 @@ def lecturer_dashboard(db: Session, *, lecturer_id: UUID, full_name: str) -> dic
     )
     total_sessions = (
         db.query(func.count(AttendanceSession.id))
-        .join(CourseAssignment, AttendanceSession.course_assignment_id == CourseAssignment.id)
+        .join(
+            CourseAssignment,
+            AttendanceSession.course_assignment_id == CourseAssignment.id,
+        )
         .filter(CourseAssignment.lecturer_id == lecturer_id)
         .scalar()
     )
@@ -53,7 +56,10 @@ def lecturer_dashboard(db: Session, *, lecturer_id: UUID, full_name: str) -> dic
             AttendanceSession.geofencing_enabled,
             AttendanceSession.radius_meters,
         )
-        .join(CourseAssignment, AttendanceSession.course_assignment_id == CourseAssignment.id)
+        .join(
+            CourseAssignment,
+            AttendanceSession.course_assignment_id == CourseAssignment.id,
+        )
         .join(Course, CourseAssignment.course_id == Course.id)
         .filter(
             CourseAssignment.lecturer_id == lecturer_id,
@@ -130,7 +136,10 @@ def student_dashboard(
             AttendanceRecord.status,
         )
         .join(AttendanceSession, AttendanceRecord.session_id == AttendanceSession.id)
-        .join(CourseAssignment, AttendanceSession.course_assignment_id == CourseAssignment.id)
+        .join(
+            CourseAssignment,
+            AttendanceSession.course_assignment_id == CourseAssignment.id,
+        )
         .join(Course, CourseAssignment.course_id == Course.id)
         .filter(AttendanceRecord.student_id == student_id)
         .order_by(AttendanceRecord.check_in_time.desc())

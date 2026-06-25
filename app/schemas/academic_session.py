@@ -31,4 +31,3 @@ class AcademicSession(AcademicSessionBase):
     updated_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
-

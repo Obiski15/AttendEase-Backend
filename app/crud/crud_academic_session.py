@@ -16,13 +16,18 @@ class CRUDAcademicSession(
 
         if obj_in.is_active:
             # Overlap check
-            active_session = db.query(AcademicSession).filter(
-                AcademicSession.is_active.is_(True)
-            ).first()
+            active_session = (
+                db.query(AcademicSession)
+                .filter(AcademicSession.is_active.is_(True))
+                .first()
+            )
             if active_session:
-                if (active_session.start_date and active_session.end_date and
-                        active_session.start_date <= obj_in.end_date and
-                        obj_in.start_date <= active_session.end_date):
+                if (
+                    active_session.start_date
+                    and active_session.end_date
+                    and active_session.start_date <= obj_in.end_date
+                    and obj_in.start_date <= active_session.end_date
+                ):
                     raise ValueError(
                         "Cannot activate academic session. "
                         "It overlaps with the date range of the currently active session."
@@ -54,14 +59,20 @@ class CRUDAcademicSession(
 
         if is_active:
             # Overlap check
-            active_session = db.query(AcademicSession).filter(
-                AcademicSession.is_active.is_(True),
-                AcademicSession.id != db_obj.id
-            ).first()
+            active_session = (
+                db.query(AcademicSession)
+                .filter(
+                    AcademicSession.is_active.is_(True), AcademicSession.id != db_obj.id
+                )
+                .first()
+            )
             if active_session:
-                if (active_session.start_date and active_session.end_date and
-                        active_session.start_date <= end_date and
-                        start_date <= active_session.end_date):
+                if (
+                    active_session.start_date
+                    and active_session.end_date
+                    and active_session.start_date <= end_date
+                    and start_date <= active_session.end_date
+                ):
                     raise ValueError(
                         "Cannot activate academic session. "
                         "It overlaps with the date range of the currently active session."
@@ -73,15 +84,22 @@ class CRUDAcademicSession(
     def activate(self, db: Session, *, db_obj: AcademicSession) -> AcademicSession:
         """Mark this session active and deactivate all others (only one active)."""
         # Overlap check
-        active_session = db.query(AcademicSession).filter(
-            AcademicSession.is_active.is_(True),
-            AcademicSession.id != db_obj.id
-        ).first()
+        active_session = (
+            db.query(AcademicSession)
+            .filter(
+                AcademicSession.is_active.is_(True), AcademicSession.id != db_obj.id
+            )
+            .first()
+        )
         if active_session:
-            if (active_session.start_date and active_session.end_date and
-                    db_obj.start_date and db_obj.end_date and
-                    active_session.start_date <= db_obj.end_date and
-                    db_obj.start_date <= active_session.end_date):
+            if (
+                active_session.start_date
+                and active_session.end_date
+                and db_obj.start_date
+                and db_obj.end_date
+                and active_session.start_date <= db_obj.end_date
+                and db_obj.start_date <= active_session.end_date
+            ):
                 raise ValueError(
                     "Cannot activate academic session. "
                     "It overlaps with the date range of the currently active session."

@@ -16,7 +16,9 @@ class AttendanceSession(Base):
     __tablename__ = "attendance_sessions"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    course_assignment_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("course_assignments.id"))
+    course_assignment_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("course_assignments.id")
+    )
     session_date: Mapped[date] = mapped_column(Date)
     start_time: Mapped[datetime] = mapped_column()
     expires_at: Mapped[datetime] = mapped_column()
@@ -27,10 +29,16 @@ class AttendanceSession(Base):
     longitude: Mapped[Optional[float]] = mapped_column(nullable=True)
     radius_meters: Mapped[Optional[int]] = mapped_column(default=50, nullable=True)
     created_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())
-    updated_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(
+        server_default=func.now(), onupdate=func.now()
+    )
 
-    course_assignment: Mapped["CourseAssignment"] = relationship(back_populates="attendance_sessions")
-    attendance_records: Mapped[List["AttendanceRecord"]] = relationship(back_populates="attendance_session")
+    course_assignment: Mapped["CourseAssignment"] = relationship(
+        back_populates="attendance_sessions"
+    )
+    attendance_records: Mapped[List["AttendanceRecord"]] = relationship(
+        back_populates="attendance_session"
+    )
 
     @property
     def records_count(self) -> int:
@@ -38,6 +46,10 @@ class AttendanceSession(Base):
 
     @property
     def total_students(self) -> int:
-        if self.course_assignment and self.course_assignment.course and self.course_assignment.course.department:
+        if (
+            self.course_assignment
+            and self.course_assignment.course
+            and self.course_assignment.course.department
+        ):
             return len(self.course_assignment.course.department.students)
         return 0

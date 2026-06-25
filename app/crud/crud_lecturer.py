@@ -18,7 +18,9 @@ class CRUDLecturer(CRUDBase[Lecturer, LecturerCreate, LecturerUpdate]):
     def get_by_staff_id(self, db: Session, *, staff_id: str) -> Optional[Lecturer]:
         return db.query(Lecturer).filter(Lecturer.staff_id == staff_id).first()
 
-    def get_multi(self, db: Session, *, skip: int = 0, limit: int = 100) -> List[Lecturer]:
+    def get_multi(
+        self, db: Session, *, skip: int = 0, limit: int = 100
+    ) -> List[Lecturer]:
         return db.query(Lecturer).offset(skip).limit(limit).all()
 
     def create_with_user(self, db: Session, *, obj_in: LecturerCreate) -> Lecturer:

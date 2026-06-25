@@ -23,9 +23,15 @@ class AttendanceRecordCreate(BaseModel):
 class AttendanceCheckIn(BaseModel):
     """Student check-in: submit the code shown by the lecturer."""
 
-    session_code: str = Field(..., description="The code for the open attendance session.")
-    latitude: Optional[float] = Field(default=None, description="Current latitude of the student.")
-    longitude: Optional[float] = Field(default=None, description="Current longitude of the student.")
+    session_code: str = Field(
+        ..., description="The code for the open attendance session."
+    )
+    latitude: Optional[float] = Field(
+        default=None, description="Current latitude of the student."
+    )
+    longitude: Optional[float] = Field(
+        default=None, description="Current longitude of the student."
+    )
 
 
 class AttendanceRecordUpdate(BaseModel):
