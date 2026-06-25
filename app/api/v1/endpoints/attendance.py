@@ -19,10 +19,36 @@ logger = logging.getLogger(__name__)
 
 
 @router.post(
-    "/check-in",
-    response_model=schemas.AttendanceRecord,
-    status_code=status.HTTP_201_CREATED,
-    summary="Check in to an attendance session (student)",
+    "/check-in",  
+    status_code=201,
+    summary="Submit a student check-in",
+    description=(
+        "Validates a student's check-in attempt using their current GPS location and the session code. "
+        "Verifies session expiration, departmental compliance, and geofence radius restrictions. "
+        "On success, creates an attendance record and triggers a live WebSocket update for the lecturer."
+    ),
+    responses={
+        201: {
+            "description": "Success - Attendance successfully verified and recorded."
+        },
+        400: {
+            "description": (
+                "Bad Request - Validation failed. Potential reasons: "
+                "1. The attendance session has expired or is inactive. "
+                "2. The student is outside the allowed geofenced radius. "
+                "3. The student does not belong to the correct department for this course."
+            )
+        },
+        401: {
+            "description": "Unauthorized - Missing or invalid Bearer JWT security token."
+        },
+        403: {
+            "description": "Forbidden - Only users with the 'Student' role can check into a session."
+        },
+        404: {
+            "description": "Not Found - The provided Session Code does not match any active lecture."
+        }
+    }
 )
 def check_in(
     *,
