@@ -12,7 +12,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.websocket("/attendance/{session_id}")
+@router.websocket("/ws/attendance/{session_id}")
 async def websocket_attendance_endpoint(
     websocket: WebSocket,
     session_id: str,

@@ -12,7 +12,10 @@ class JSONEncoder(json.JSONEncoder):
     def default(self, o: Any) -> Any:
         if isinstance(o, (uuid.UUID, datetime, date)):
             return str(o)
-        return super().default(o)
+        try:
+            return super().default(o)
+        except TypeError:
+            return str(o)
 
 
 class JSONFormatter(logging.Formatter):
