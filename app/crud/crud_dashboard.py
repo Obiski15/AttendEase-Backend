@@ -112,11 +112,19 @@ def lecturer_dashboard(db: Session, *, lecturer_id: UUID, full_name: str) -> dic
 def student_dashboard(
     db: Session, *, student_id: UUID, full_name: str, recent_limit: int = 5
 ) -> dict:
+    from app.models.student import Student
+    
+    student = db.query(Student).filter(Student.user_id == student_id).first()
+    student_dept_id = student.department_id if student else None
+
     total_count = (
-        db.query(func.count(AttendanceRecord.id))
-        .filter(AttendanceRecord.student_id == student_id)
+        db.query(func.count(AttendanceSession.id))
+        .join(CourseAssignment, AttendanceSession.course_assignment_id == CourseAssignment.id)
+        .join(Course, CourseAssignment.course_id == Course.id)
+        .filter(Course.department_id == student_dept_id)
         .scalar()
-    )
+    ) or 0
+
     present_count = (
         db.query(func.count(AttendanceRecord.id))
         .filter(
@@ -124,7 +132,8 @@ def student_dashboard(
             AttendanceRecord.status == "PRESENT",
         )
         .scalar()
-    )
+    ) or 0
+    
     percentage = round(present_count / total_count * 100, 1) if total_count else 0.0
 
     recent_rows = (
