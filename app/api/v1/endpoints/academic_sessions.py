@@ -92,7 +92,14 @@ def update_academic_session(
 @router.post(
     "/{session_id}/activate",
     response_model=schemas.AcademicSession,
-    summary="Activate an academic session (admin)",
+    summary="Activate an academic session",
+    description="Changes the status of a specific academic session to active. This session will be used as the current institutional framework for courses and attendance tracking. Restricted to IT Administrators.",
+    responses={
+        200: {"description": "Success - Academic session has been successfully activated"},
+        401: {"description": "Unauthorized - Missing or invalid Bearer JWT token"},
+        403: {"description": "Forbidden - Current user does not have Administrator privileges"},
+        404: {"description": "Not Found - No academic session found with the provided session_id"}
+    }
 )
 def activate_academic_session(
     *,

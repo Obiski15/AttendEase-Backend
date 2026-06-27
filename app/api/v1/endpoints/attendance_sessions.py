@@ -136,7 +136,28 @@ def read_attendance_session(
 @router.post(
     "/{session_id}/close",
     response_model=schemas.AttendanceSession,
-    summary="Close an attendance session (lecturer)",
+    status_code=200,
+    summary="Close an active attendance session",
+    description=(
+        "Allows an authorized Lecturer to manually terminate a live attendance tracking session before its scheduled expiration time."
+    ),
+    responses={
+        200: {
+            "description": "Success - Attendance session has been successfully closed."
+        },
+        400: {
+            "description": "Bad Request - Invalid geofence parameters or lecturer is not assigned to this course"
+        },
+        401: {
+            "description": "Unauthorized - Missing or invalid Bearer JWT security token"
+        },
+        403: {
+            "description": "Forbidden - Current user role is not authorized (Lecturer permissions required)"
+        },
+        404: {
+            "description": "Not Found - The specified course or active academic session does not exist"
+        }
+    }
 )
 def close_attendance_session(
     *,
