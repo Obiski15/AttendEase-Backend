@@ -19,7 +19,7 @@ class AttendanceRecord(Base):
     )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    session_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("attendance_sessions.id"))
+    session_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("attendance_sessions.id", ondelete="CASCADE"))
     student_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("students.user_id"))
     check_in_time: Mapped[datetime] = mapped_column()
     latitude: Mapped[Optional[float]] = mapped_column(nullable=True)

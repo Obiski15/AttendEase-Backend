@@ -76,21 +76,30 @@ class CRUDAttendanceSession(
 
         # Ensure a unique session code.
         code = obj_in.session_code
-        while code is None or self.get_by_code(db, session_code=code):
-            code = _generate_code()
+        if code is None:
+            while code is None or self.get_by_code(db, session_code=code):
+                code = _generate_code()
+        else:
+            # If client provides code, verify no collision exists just in case
+            if self.get_by_code(db, session_code=code):
+                raise ValueError("Session code collision")
 
-        db_obj = AttendanceSession(
-            course_assignment_id=obj_in.course_assignment_id,
-            session_date=obj_in.session_date or date.today(),
-            start_time=start_time,
-            expires_at=expires_at,
-            session_code=code,
-            status="ACTIVE",
-            geofencing_enabled=obj_in.geofencing_enabled or False,
-            latitude=obj_in.latitude,
-            longitude=obj_in.longitude,
-            radius_meters=obj_in.radius_meters or 50,
-        )
+        kwargs = {
+            "course_assignment_id": obj_in.course_assignment_id,
+            "session_date": obj_in.session_date or date.today(),
+            "start_time": start_time,
+            "expires_at": expires_at,
+            "session_code": code,
+            "status": "ACTIVE",
+            "geofencing_enabled": obj_in.geofencing_enabled or False,
+            "latitude": obj_in.latitude,
+            "longitude": obj_in.longitude,
+            "radius_meters": obj_in.radius_meters or 50,
+        }
+        if obj_in.id is not None:
+            kwargs["id"] = obj_in.id
+
+        db_obj = AttendanceSession(**kwargs)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)

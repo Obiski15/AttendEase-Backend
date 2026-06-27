@@ -21,6 +21,7 @@ class AttendanceSessionBase(BaseModel):
 class AttendanceSessionCreate(BaseModel):
     """Open a new attendance window for a course assignment."""
 
+    id: Optional[UUID] = Field(default=None, description="Optional client-generated UUID for offline sync.", example="123e4567-e89b-12d3-a456-426614174011")
     course_assignment_id: UUID = Field(..., description="ID of the course assignment.", example="123e4567-e89b-12d3-a456-426614174011")
     session_date: Optional[date] = Field(default=None, description="Defaults to today.", example="2026-06-25")
     start_time: Optional[datetime] = Field(default=None, description="Session start time.", example="2026-06-25T10:00:00Z")
