@@ -230,8 +230,12 @@ def check_in(
 
 @router.get(
     "/me",
-    response_model=List[schemas.AttendanceRecord],
+    response_model=List[schemas.AttendanceHistoryRecord],
     summary="List my attendance records (student)",
+    responses={
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Student only)"}
+    }
 )
 def read_my_attendance(
     db: Session = Depends(deps.get_db),
@@ -240,6 +244,14 @@ def read_my_attendance(
     current_user: User = Depends(deps.require_student),
 ) -> Any:
     """List the calling student's own attendance records."""
-    return crud.attendance_record.get_multi_by_student(
+    records = crud.attendance_record.get_multi_by_student(
         db, student_id=current_user.id, skip=skip, limit=limit
     )
+    result = []
+    for r in records:
+        schema = schemas.AttendanceHistoryRecord.model_validate(r)
+        if r.attendance_session and r.attendance_session.course_assignment and r.attendance_session.course_assignment.course:
+            schema.course_code = r.attendance_session.course_assignment.course.course_code
+            schema.course_title = r.attendance_session.course_assignment.course.title
+        result.append(schema)
+    return result

@@ -13,15 +13,20 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+
 @router.get(
     "/",
     response_model=List[schemas.AcademicSession],
     summary="List academic sessions",
+    responses={
+        401: {"description": "Not authenticated"}
+    }
 )
 def read_academic_sessions(
     db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, description="Number of records to skip"),
+    limit: int = Query(100, description="Maximum number of records to return"),
     _: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """List all academic sessions / semesters. Any authenticated user."""
@@ -33,6 +38,11 @@ def read_academic_sessions(
     response_model=schemas.AcademicSession,
     status_code=status.HTTP_201_CREATED,
     summary="Create an academic session (admin)",
+    responses={
+        400: {"description": "Invalid input"},
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Admin only)"}
+    }
 )
 def create_academic_session(
     *,
@@ -53,6 +63,10 @@ def create_academic_session(
     "/{session_id}",
     response_model=schemas.AcademicSession,
     summary="Get an academic session",
+    responses={
+        401: {"description": "Not authenticated"},
+        404: {"description": "Academic session not found"}
+    }
 )
 def read_academic_session(
     *,
@@ -70,6 +84,12 @@ def read_academic_session(
     "/{session_id}",
     response_model=schemas.AcademicSession,
     summary="Update an academic session (admin)",
+    responses={
+        400: {"description": "Invalid update data"},
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Admin only)"},
+        404: {"description": "Academic session not found"}
+    }
 )
 def update_academic_session(
     *,
@@ -123,6 +143,11 @@ def activate_academic_session(
     "/{session_id}",
     response_model=schemas.AcademicSession,
     summary="Delete an academic session (admin)",
+    responses={
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Admin only)"},
+        404: {"description": "Academic session not found"}
+    }
 )
 def delete_academic_session(
     *,

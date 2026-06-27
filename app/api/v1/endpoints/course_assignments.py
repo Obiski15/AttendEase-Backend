@@ -13,15 +13,21 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+
 @router.get(
     "/",
     response_model=List[schemas.CourseAssignment],
     summary="List course assignments",
+    responses={
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Student role cannot view assignments)"}
+    }
 )
 def read_course_assignments(
     db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, description="Number of records to skip"),
+    limit: int = Query(100, description="Maximum number of records to return"),
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """List course assignments. Lecturers see only their own; admins see all."""
@@ -39,6 +45,12 @@ def read_course_assignments(
     response_model=schemas.CourseAssignment,
     status_code=status.HTTP_201_CREATED,
     summary="Create a course assignment (admin)",
+    responses={
+        400: {"description": "Validation failed (e.g., session not active)"},
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Admin only)"},
+        404: {"description": "Course, Lecturer, or Academic session not found"}
+    }
 )
 def create_course_assignment(
     *,
@@ -85,6 +97,11 @@ def create_course_assignment(
     "/{assignment_id}",
     response_model=schemas.CourseAssignment,
     summary="Get a course assignment",
+    responses={
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized to view this assignment"},
+        404: {"description": "Course assignment not found"}
+    }
 )
 def read_course_assignment(
     *,
@@ -106,6 +123,11 @@ def read_course_assignment(
     "/{assignment_id}",
     response_model=schemas.CourseAssignment,
     summary="Delete a course assignment (admin)",
+    responses={
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Admin only)"},
+        404: {"description": "Course assignment not found"}
+    }
 )
 def delete_course_assignment(
     *,
