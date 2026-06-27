@@ -17,7 +17,7 @@ class AttendanceSession(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     course_assignment_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("course_assignments.id")
+        ForeignKey("course_assignments.id", ondelete="CASCADE")
     )
     session_date: Mapped[date] = mapped_column(Date)
     start_time: Mapped[datetime] = mapped_column()
@@ -37,7 +37,9 @@ class AttendanceSession(Base):
         back_populates="attendance_sessions"
     )
     attendance_records: Mapped[List["AttendanceRecord"]] = relationship(
-        back_populates="attendance_session"
+        back_populates="attendance_session",
+        cascade="all, delete-orphan",
+        passive_deletes=True
     )
 
     @property

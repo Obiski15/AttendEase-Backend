@@ -91,20 +91,29 @@ def check_in(
         )
         raise HTTPException(status_code=404, detail="Invalid session code.")
 
-    if not crud.attendance_session.is_open(session):
+    check_time = payload.check_in_time or datetime.now(timezone.utc)
+    if check_time.tzinfo is None:
+        check_time = check_time.replace(tzinfo=timezone.utc)
+
+    session_expires_at = session.expires_at
+    if session_expires_at.tzinfo is None:
+        session_expires_at = session_expires_at.replace(tzinfo=timezone.utc)
+
+    # If the check_in_time is after the session expired, reject it.
+    # We do NOT reject based purely on session.status == "COMPLETED" because a lecturer 
+    # might have closed the session while the student was still offline trying to sync.
+    if check_time > session_expires_at:
         logger.warning(
-            f"Check-in failed for student {student.user_id}: Session {session.id} is closed or expired",
+            f"Check-in failed for student {student.user_id}: Check-in time {check_time} is past expiration {session_expires_at}",
             extra={
                 "student_id": student.user_id,
                 "session_id": session.id,
                 "session_code": payload.session_code,
-                "latitude": payload.latitude,
-                "longitude": payload.longitude,
                 "validation_outcome": "EXPIRED_CODE",
             },
         )
         raise HTTPException(
-            status_code=400, detail="This attendance session is closed or expired."
+            status_code=400, detail="This attendance session was closed or expired at the time of your check-in."
         )
 
     existing = crud.attendance_record.get_by_session_and_student(
@@ -170,7 +179,7 @@ def check_in(
     record = AttendanceRecord(
         session_id=session.id,
         student_id=student.user_id,
-        check_in_time=datetime.now(timezone.utc),
+        check_in_time=check_time,
         latitude=payload.latitude,
         longitude=payload.longitude,
         status="PRESENT",

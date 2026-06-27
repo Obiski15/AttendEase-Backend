@@ -34,5 +34,7 @@ class CourseAssignment(Base):
         back_populates="course_assignments"
     )
     attendance_sessions: Mapped[List["AttendanceSession"]] = relationship(
-        back_populates="course_assignment"
+        back_populates="course_assignment",
+        cascade="all, delete-orphan",
+        passive_deletes=True
     )

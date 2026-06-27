@@ -32,6 +32,9 @@ class AttendanceCheckIn(BaseModel):
     longitude: Optional[float] = Field(
         default=None, description="Current longitude of the student.", example=-122.4194
     )
+    check_in_time: Optional[datetime] = Field(
+        default=None, description="Optional offline check-in time.", example="2026-06-25T10:15:30Z"
+    )
 
 
 class AttendanceRecordUpdate(BaseModel):
