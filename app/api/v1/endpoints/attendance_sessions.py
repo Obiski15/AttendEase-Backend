@@ -135,16 +135,15 @@ def read_attendance_session(
 
 @router.post(
     "/{session_id}/close",
-    status_code=201,
-    summary="Open a new attendance session",
+    response_model=schemas.AttendanceSession,
+    status_code=200,
+    summary="Close an active attendance session",
     description=(
-        "Allows an authorized Lecturer to start a live attendance tracking session for an assigned course. "
-        "The lecturer must provide GPS coordinates and a geofence radius. The system will automatically "
-        "generate a unique, time-sensitive Session Code that students use to check in."
+        "Allows an authorized Lecturer to manually terminate a live attendance tracking session before its scheduled expiration time."
     ),
     responses={
-        201: {
-            "description": "Success - Attendance session created and active. Returns the unique Session Code."
+        200: {
+            "description": "Success - Attendance session has been successfully closed."
         },
         400: {
             "description": "Bad Request - Invalid geofence parameters or lecturer is not assigned to this course"
