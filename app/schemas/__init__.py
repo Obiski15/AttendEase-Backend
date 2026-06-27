@@ -23,6 +23,7 @@ from .attendance_record import (
     AttendanceRecord,
     AttendanceRecordCreate,
     AttendanceRecordUpdate,
+    AttendanceHistoryRecord,
     AttendanceCheckIn,
 )
 from .dashboard import AdminDashboard, LecturerDashboard, StudentDashboard

@@ -17,12 +17,21 @@ logger = logging.getLogger(__name__)
     "/admin",
     response_model=schemas.AdminDashboard,
     summary="Admin dashboard overview",
+    responses={
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Admin only)"}
+    }
 )
 def admin_dashboard(
     db: Session = Depends(deps.get_db),
     _: User = Depends(deps.require_admin),
 ) -> Any:
-    """System-wide totals: students, lecturers, courses and active sessions. Admin only."""
+    """
+    Retrieve system-wide totals.
+    
+    Returns the total count of registered students, lecturers, courses, and active attendance sessions.
+    Requires Admin role.
+    """
     return crud_dashboard.admin_stats(db)
 
 
@@ -30,12 +39,21 @@ def admin_dashboard(
     "/lecturer",
     response_model=schemas.LecturerDashboard,
     summary="Lecturer dashboard overview",
+    responses={
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Lecturer only)"}
+    }
 )
 def lecturer_dashboard(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.require_lecturer),
 ) -> Any:
-    """Assigned courses, active sessions and total sessions for the logged-in lecturer."""
+    """
+    Retrieve lecturer-specific dashboard statistics.
+    
+    Returns assigned courses, total historical sessions, and a list of currently active attendance sessions for the logged-in lecturer.
+    Requires Lecturer role.
+    """
     return crud_dashboard.lecturer_dashboard(
         db, lecturer_id=current_user.id, full_name=current_user.full_name
     )
@@ -45,6 +63,11 @@ def lecturer_dashboard(
     "/student",
     response_model=schemas.StudentDashboard,
     summary="Student dashboard overview",
+    responses={
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Student only)"},
+        404: {"description": "Student profile not found"}
+    }
 )
 def student_dashboard(
     db: Session = Depends(deps.get_db),

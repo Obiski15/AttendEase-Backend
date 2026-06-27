@@ -2,19 +2,19 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class CourseAssignmentBase(BaseModel):
-    course_id: Optional[UUID] = None
-    lecturer_id: Optional[UUID] = None
-    academic_session_id: Optional[UUID] = None
+    course_id: Optional[UUID] = Field(default=None, description="ID of the course.", example="123e4567-e89b-12d3-a456-426614174006")
+    lecturer_id: Optional[UUID] = Field(default=None, description="ID of the assigned lecturer.", example="123e4567-e89b-12d3-a456-426614174008")
+    academic_session_id: Optional[UUID] = Field(default=None, description="ID of the academic session.", example="123e4567-e89b-12d3-a456-426614174007")
 
 
 class CourseAssignmentCreate(BaseModel):
-    course_id: UUID
-    lecturer_id: UUID
-    academic_session_id: UUID
+    course_id: UUID = Field(..., description="ID of the course.", example="123e4567-e89b-12d3-a456-426614174006")
+    lecturer_id: UUID = Field(..., description="ID of the assigned lecturer.", example="123e4567-e89b-12d3-a456-426614174008")
+    academic_session_id: UUID = Field(..., description="ID of the academic session.", example="123e4567-e89b-12d3-a456-426614174007")
 
 
 class CourseAssignmentUpdate(CourseAssignmentBase):
@@ -22,8 +22,8 @@ class CourseAssignmentUpdate(CourseAssignmentBase):
 
 
 class CourseAssignment(CourseAssignmentBase):
-    id: UUID
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    id: UUID = Field(..., description="Unique ID of the course assignment.", example="123e4567-e89b-12d3-a456-426614174011")
+    created_at: Optional[datetime] = Field(default=None, description="Creation timestamp.")
+    updated_at: Optional[datetime] = Field(default=None, description="Last update timestamp.")
 
     model_config = {"from_attributes": True}

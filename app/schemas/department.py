@@ -2,15 +2,15 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class DepartmentBase(BaseModel):
-    name: Optional[str] = None
+    name: Optional[str] = Field(default=None, description="Name of the department.", example="Computer Science")
 
 
 class DepartmentCreate(BaseModel):
-    name: str
+    name: str = Field(..., description="Name of the department.", example="Computer Science")
 
 
 class DepartmentUpdate(DepartmentBase):
@@ -18,8 +18,8 @@ class DepartmentUpdate(DepartmentBase):
 
 
 class Department(DepartmentBase):
-    id: UUID
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    id: UUID = Field(..., description="Unique ID of the department.", example="123e4567-e89b-12d3-a456-426614174005")
+    created_at: Optional[datetime] = Field(default=None, description="Creation timestamp.")
+    updated_at: Optional[datetime] = Field(default=None, description="Last update timestamp.")
 
     model_config = {"from_attributes": True}

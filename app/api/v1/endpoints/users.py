@@ -13,15 +13,21 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+
 @router.get(
     "/",
     response_model=List[schemas.User],
     summary="List users (admin)",
+    responses={
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Admin only)"}
+    }
 )
 def read_users(
     db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, description="Number of users to skip for pagination."),
+    limit: int = Query(100, description="Maximum number of users to return."),
     _: User = Depends(deps.require_admin),
 ) -> Any:
     """Retrieve all users. Admin only."""
@@ -33,6 +39,11 @@ def read_users(
     response_model=schemas.User,
     status_code=status.HTTP_201_CREATED,
     summary="Create a user (admin)",
+    responses={
+        400: {"description": "Email already exists"},
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Admin only)"}
+    }
 )
 def create_user(
     *,

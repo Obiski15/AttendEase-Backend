@@ -2,40 +2,40 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 from app.schemas.user import User
 
 
 class StudentBase(BaseModel):
-    student_id: Optional[str] = None
-    matric_number: Optional[str] = None
-    department_id: Optional[UUID] = None
-    level: Optional[str] = None
+    student_id: Optional[str] = Field(default=None, description="University-assigned student ID.", example="STU-001234")
+    matric_number: Optional[str] = Field(default=None, description="Matriculation number.", example="M1234567")
+    department_id: Optional[UUID] = Field(default=None, description="ID of the student's department.", example="123e4567-e89b-12d3-a456-426614174005")
+    level: Optional[str] = Field(default=None, description="Academic level (e.g., 100, 200, 300).", example="200")
 
 
 class StudentCreate(BaseModel):
     """Admin creates a student: provisions the User account + Student profile."""
 
-    email: EmailStr
-    password: str
-    full_name: str
-    student_id: str
-    matric_number: str
-    department_id: UUID
-    level: str
+    email: EmailStr = Field(..., description="Student's email address.", example="student@university.edu")
+    password: str = Field(..., description="Initial password.", example="SecurePass123!")
+    full_name: str = Field(..., description="Student's full name.", example="Jane Smith")
+    student_id: str = Field(..., description="University-assigned student ID.", example="STU-001234")
+    matric_number: str = Field(..., description="Matriculation number.", example="M1234567")
+    department_id: UUID = Field(..., description="ID of the student's department.", example="123e4567-e89b-12d3-a456-426614174005")
+    level: str = Field(..., description="Academic level.", example="200")
 
 
 class StudentRegister(BaseModel):
     """Public self-registration payload for a new student."""
 
-    email: EmailStr
-    password: str
-    full_name: str
-    student_id: str
-    matric_number: str
-    department_id: UUID
-    level: str
+    email: EmailStr = Field(..., description="Student's email address.", example="student@university.edu")
+    password: str = Field(..., description="Initial password.", example="SecurePass123!")
+    full_name: str = Field(..., description="Student's full name.", example="Jane Smith")
+    student_id: str = Field(..., description="University-assigned student ID.", example="STU-001234")
+    matric_number: str = Field(..., description="Matriculation number.", example="M1234567")
+    department_id: UUID = Field(..., description="ID of the student's department.", example="123e4567-e89b-12d3-a456-426614174005")
+    level: str = Field(..., description="Academic level.", example="200")
 
 
 class StudentUpdate(StudentBase):
@@ -43,9 +43,9 @@ class StudentUpdate(StudentBase):
 
 
 class Student(StudentBase):
-    user_id: UUID
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    user: Optional[User] = None
+    user_id: UUID = Field(..., description="ID of the associated User account.", example="123e4567-e89b-12d3-a456-426614174099")
+    created_at: Optional[datetime] = Field(default=None, description="Profile creation timestamp.")
+    updated_at: Optional[datetime] = Field(default=None, description="Profile last update timestamp.")
+    user: Optional[User] = Field(default=None, description="The nested User account details.")
 
     model_config = {"from_attributes": True}

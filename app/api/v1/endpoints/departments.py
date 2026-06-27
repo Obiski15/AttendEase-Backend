@@ -13,11 +13,20 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.get("/", response_model=List[schemas.Department], summary="List departments")
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+
+@router.get(
+    "/",
+    response_model=List[schemas.Department],
+    summary="List departments",
+    responses={
+        401: {"description": "Not authenticated"}
+    }
+)
 def read_departments(
     db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, description="Number of records to skip"),
+    limit: int = Query(100, description="Maximum number of records to return"),
     _: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """List all departments. Any authenticated user."""
@@ -29,6 +38,11 @@ def read_departments(
     response_model=schemas.Department,
     status_code=status.HTTP_201_CREATED,
     summary="Create a department (admin)",
+    responses={
+        400: {"description": "Department name already exists"},
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Admin only)"}
+    }
 )
 def create_department(
     *,
@@ -47,7 +61,13 @@ def create_department(
 
 
 @router.get(
-    "/{department_id}", response_model=schemas.Department, summary="Get a department"
+    "/{department_id}",
+    response_model=schemas.Department,
+    summary="Get a department",
+    responses={
+        401: {"description": "Not authenticated"},
+        404: {"description": "Department not found"}
+    }
 )
 def read_department(
     *,
@@ -65,6 +85,11 @@ def read_department(
     "/{department_id}",
     response_model=schemas.Department,
     summary="Update a department (admin)",
+    responses={
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Admin only)"},
+        404: {"description": "Department not found"}
+    }
 )
 def update_department(
     *,
@@ -85,6 +110,11 @@ def update_department(
     "/{department_id}",
     response_model=schemas.Department,
     summary="Delete a department (admin)",
+    responses={
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Admin only)"},
+        404: {"description": "Department not found"}
+    }
 )
 def delete_department(
     *,

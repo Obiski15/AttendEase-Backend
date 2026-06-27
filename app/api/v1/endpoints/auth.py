@@ -31,6 +31,10 @@ def _build_login_response(user: User) -> schemas.LoginResponse:
     "/login",
     response_model=schemas.LoginResponse,
     summary="Log in and obtain tokens",
+    responses={
+        401: {"description": "Incorrect email or password"},
+        403: {"description": "Inactive user account"}
+    }
 )
 def login(
     payload: schemas.LoginPayload,
@@ -63,6 +67,9 @@ def login(
     "/refresh",
     response_model=schemas.LoginResponse,
     summary="Refresh the access token",
+    responses={
+        401: {"description": "Invalid or expired refresh token"}
+    }
 )
 def refresh_token(
     body: schemas.TokenRefresh,
@@ -94,6 +101,10 @@ def refresh_token(
     response_model=schemas.LoginResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Register a new student (self-service)",
+    responses={
+        400: {"description": "Email or matric number already registered"},
+        404: {"description": "Department not found"}
+    }
 )
 def register(
     body: schemas.StudentRegister,
@@ -120,6 +131,9 @@ def register(
     "/me",
     response_model=schemas.User,
     summary="Get the current logged-in user",
+    responses={
+        401: {"description": "Not authenticated"}
+    }
 )
 def read_me(
     current_user: User = Depends(deps.get_current_active_user),
@@ -132,6 +146,10 @@ def read_me(
     "/me",
     response_model=schemas.User,
     summary="Update current logged-in user profile",
+    responses={
+        400: {"description": "Email already in use"},
+        401: {"description": "Not authenticated"}
+    }
 )
 def update_me(
     *,
@@ -155,6 +173,10 @@ def update_me(
 @router.post(
     "/change-password",
     summary="Change the current user's password",
+    responses={
+        400: {"description": "Incorrect old password"},
+        401: {"description": "Not authenticated"}
+    }
 )
 def change_password(
     body: schemas.PasswordUpdate,

@@ -13,11 +13,20 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.get("/", response_model=List[schemas.Course], summary="List courses")
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+
+@router.get(
+    "/",
+    response_model=List[schemas.Course],
+    summary="List courses",
+    responses={
+        401: {"description": "Not authenticated"}
+    }
+)
 def read_courses(
     db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(0, description="Number of records to skip"),
+    limit: int = Query(100, description="Maximum number of records to return"),
     _: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """List all courses. Any authenticated user."""
@@ -29,6 +38,12 @@ def read_courses(
     response_model=schemas.Course,
     status_code=status.HTTP_201_CREATED,
     summary="Create a course (admin)",
+    responses={
+        400: {"description": "Course code already exists"},
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Admin only)"},
+        404: {"description": "Department not found"}
+    }
 )
 def create_course(
     *,
@@ -48,7 +63,15 @@ def create_course(
     return course
 
 
-@router.get("/{course_id}", response_model=schemas.Course, summary="Get a course")
+@router.get(
+    "/{course_id}",
+    response_model=schemas.Course,
+    summary="Get a course",
+    responses={
+        401: {"description": "Not authenticated"},
+        404: {"description": "Course not found"}
+    }
+)
 def read_course(
     *,
     db: Session = Depends(deps.get_db),
@@ -65,6 +88,11 @@ def read_course(
     "/{course_id}",
     response_model=schemas.Course,
     summary="Update a course (admin)",
+    responses={
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Admin only)"},
+        404: {"description": "Course not found"}
+    }
 )
 def update_course(
     *,
@@ -85,6 +113,11 @@ def update_course(
     "/{course_id}",
     response_model=schemas.Course,
     summary="Delete a course (admin)",
+    responses={
+        401: {"description": "Not authenticated"},
+        403: {"description": "Not authorized (Admin only)"},
+        404: {"description": "Course not found"}
+    }
 )
 def delete_course(
     *,
