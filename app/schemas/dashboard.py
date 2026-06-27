@@ -5,12 +5,21 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
+class TrendPoint(BaseModel):
+    date_str: str = Field(..., description="Date string for the trend point.", example="2026-06-25")
+    count: int = Field(..., description="Count for this date.", example=150)
+
+class PiePoint(BaseModel):
+    label: str = Field(..., description="Label for the pie slice.", example="CSC301")
+    count: int = Field(..., description="Count for this category.", example=42)
+
 # ---- Admin ----
 class AdminDashboard(BaseModel):
     total_students: int = Field(..., description="Total number of registered students in the system.", example=1542)
     total_lecturers: int = Field(..., description="Total number of registered lecturers in the system.", example=45)
     total_courses: int = Field(..., description="Total number of available courses.", example=120)
     active_sessions: int = Field(..., description="Number of currently active attendance sessions.", example=3)
+    weekly_attendance_trend: List[TrendPoint] = Field(default_factory=list, description="System-wide check-ins over the last 7 days.")
 
 
 # ---- Lecturer ----
@@ -37,6 +46,7 @@ class LecturerDashboard(BaseModel):
     total_sessions: int = Field(..., description="Total number of attendance sessions opened by this lecturer.", example=12)
     active_sessions: List[LecturerActiveSession] = Field(..., description="List of currently open attendance sessions.")
     courses: List[LecturerCourse] = Field(..., description="List of assigned courses.")
+    course_distribution: List[PiePoint] = Field(default_factory=list, description="Distribution of attendance sessions per course.")
 
 
 # ---- Student ----

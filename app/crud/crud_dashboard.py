@@ -1,7 +1,7 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from uuid import UUID
 
-from sqlalchemy import func
+from sqlalchemy import func, cast, Date
 from sqlalchemy.orm import Session
 
 from app.models.attendance_record import AttendanceRecord
@@ -14,7 +14,7 @@ from app.models.student import Student
 
 def admin_stats(db: Session) -> dict:
     now = datetime.now(timezone.utc)
-    return {
+    result = {
         "total_students": db.query(func.count(Student.user_id)).scalar(),
         "total_lecturers": db.query(func.count(Lecturer.user_id)).scalar(),
         "total_courses": db.query(func.count(Course.id))
@@ -27,6 +27,22 @@ def admin_stats(db: Session) -> dict:
         )
         .scalar(),
     }
+    
+    seven_days_ago = now - timedelta(days=7)
+    trend_rows = (
+        db.query(
+            cast(AttendanceRecord.check_in_time, Date).label("date_val"),
+            func.count(AttendanceRecord.id).label("count")
+        )
+        .filter(AttendanceRecord.check_in_time >= seven_days_ago)
+        .group_by("date_val")
+        .order_by("date_val")
+        .all()
+    )
+    result["weekly_attendance_trend"] = [
+        {"date_str": str(r.date_val), "count": r.count} for r in trend_rows
+    ]
+    return result
 
 
 def lecturer_dashboard(db: Session, *, lecturer_id: UUID, full_name: str) -> dict:
@@ -80,6 +96,21 @@ def lecturer_dashboard(db: Session, *, lecturer_id: UUID, full_name: str) -> dic
         .filter(CourseAssignment.lecturer_id == lecturer_id)
         .all()
     )
+    
+    distribution_rows = (
+        db.query(
+            Course.course_code.label("label"),
+            func.count(AttendanceSession.id).label("count")
+        )
+        .join(
+            CourseAssignment,
+            AttendanceSession.course_assignment_id == CourseAssignment.id,
+        )
+        .join(Course, CourseAssignment.course_id == Course.id)
+        .filter(CourseAssignment.lecturer_id == lecturer_id)
+        .group_by(Course.course_code)
+        .all()
+    )
 
     return {
         "full_name": full_name,
@@ -106,6 +137,13 @@ def lecturer_dashboard(db: Session, *, lecturer_id: UUID, full_name: str) -> dic
             }
             for r in course_rows
         ],
+        "course_distribution": [
+            {
+                "label": r.label,
+                "count": r.count
+            }
+            for r in distribution_rows
+        ]
     }
 
 
