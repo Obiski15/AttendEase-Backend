@@ -23,9 +23,21 @@ class CourseUpdate(CourseBase):
     pass
 
 
+from app.schemas.department import Department
+from typing import List, ForwardRef
+from pydantic import ConfigDict
+
+CourseAssignment = ForwardRef('CourseAssignment')
+
 class Course(CourseBase):
     id: UUID = Field(..., description="Unique ID of the course.", example="123e4567-e89b-12d3-a456-426614174006")
     created_at: Optional[datetime] = Field(default=None, description="Creation timestamp.")
     updated_at: Optional[datetime] = Field(default=None, description="Last update timestamp.")
+    
+    department: Optional[Department] = Field(default=None, description="The department offering the course.")
+    course_assignments: Optional[List[CourseAssignment]] = Field(default=None, description="List of assignments for this course.")
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
+    
+from app.schemas.course_assignment import CourseAssignment
+Course.model_rebuild()

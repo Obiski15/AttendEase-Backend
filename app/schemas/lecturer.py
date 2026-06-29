@@ -5,7 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field
 
 from app.schemas.user import User
-
+from app.schemas.department import Department
 
 class LecturerBase(BaseModel):
     staff_id: Optional[str] = Field(default=None, description="University-assigned staff ID.", example="STAFF-00123")
@@ -31,5 +31,6 @@ class Lecturer(LecturerBase):
     created_at: Optional[datetime] = Field(default=None, description="Profile creation timestamp.")
     updated_at: Optional[datetime] = Field(default=None, description="Profile last update timestamp.")
     user: Optional[User] = Field(default=None, description="The nested User account details.")
+    department: Optional[Department] = Field(default=None, description="The department the lecturer belongs to.")
 
     model_config = {"from_attributes": True}

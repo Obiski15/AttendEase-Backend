@@ -239,7 +239,7 @@ def check_in(
 
 @router.get(
     "/me",
-    response_model=List[schemas.AttendanceHistoryRecord],
+    response_model=schemas.PaginatedResponse[schemas.AttendanceHistoryRecord],
     summary="List my attendance records (student)",
     responses={
         401: {"description": "Not authenticated"},
@@ -253,7 +253,7 @@ def read_my_attendance(
     current_user: User = Depends(deps.require_student),
 ) -> Any:
     """List the calling student's own attendance records."""
-    records = crud.attendance_record.get_multi_by_student(
+    records, total = crud.attendance_record.get_paginated_by_student(
         db, student_id=current_user.id, skip=skip, limit=limit
     )
     result = []
@@ -263,4 +263,4 @@ def read_my_attendance(
             schema.course_code = r.attendance_session.course_assignment.course.course_code
             schema.course_title = r.attendance_session.course_assignment.course.title
         result.append(schema)
-    return result
+    return {"items": result, "total": total, "skip": skip, "limit": limit}
