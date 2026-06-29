@@ -19,7 +19,7 @@ class Lecturer(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
-    staff_id: Mapped[str] = mapped_column(String, unique=True)
+    staff_id: Mapped[str] = mapped_column(String, unique=True, index=True)
     department_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("departments.id"))
     created_at: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())
     updated_at: Mapped[Optional[datetime]] = mapped_column(

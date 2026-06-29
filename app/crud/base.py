@@ -23,6 +23,13 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     ) -> List[ModelType]:
         return db.query(self.model).offset(skip).limit(limit).all()
 
+    def get_paginated(
+        self, db: Session, *, skip: int = 0, limit: int = 100
+    ) -> tuple[List[ModelType], int]:
+        total = db.query(self.model).count()
+        items = db.query(self.model).offset(skip).limit(limit).all()
+        return items, total
+
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
         db_obj = self.model(**obj_in_data)

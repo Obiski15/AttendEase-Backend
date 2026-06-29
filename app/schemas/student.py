@@ -43,9 +43,11 @@ class StudentUpdate(StudentBase):
 
 
 class Student(StudentBase):
-    user_id: UUID = Field(..., description="ID of the associated User account.", example="123e4567-e89b-12d3-a456-426614174099")
-    created_at: Optional[datetime] = Field(default=None, description="Profile creation timestamp.")
-    updated_at: Optional[datetime] = Field(default=None, description="Profile last update timestamp.")
-    user: Optional[User] = Field(default=None, description="The nested User account details.")
+    user_id: UUID = Field(..., description="Foreign key to the User record.")
+    created_at: Optional[datetime] = Field(default=None, description="Creation timestamp.")
+    updated_at: Optional[datetime] = Field(default=None, description="Last update timestamp.")
+    
+    user: Optional[User] = Field(default=None, description="The user details associated with this student.")
+    department: Optional[Department] = Field(default=None, description="The department the student belongs to.")
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)

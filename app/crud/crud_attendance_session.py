@@ -31,39 +31,48 @@ class CRUDAttendanceSession(
             .first()
         )
 
-    def get_multi_by_assignment(
+
+
+    def get_paginated_by_assignment(
         self,
         db: Session,
         *,
         course_assignment_id: UUID,
         skip: int = 0,
         limit: int = 100
-    ) -> List[AttendanceSession]:
-        return (
-            db.query(AttendanceSession)
-            .filter(AttendanceSession.course_assignment_id == course_assignment_id)
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
+    ) -> tuple[List[AttendanceSession], int]:
+        base_query = db.query(AttendanceSession).filter(AttendanceSession.course_assignment_id == course_assignment_id)
+        total = base_query.count()
+        items = base_query.offset(skip).limit(limit).all()
+        return items, total
 
-    def get_multi_by_lecturer(
+
+
+
+        
+
+    def get_paginated_by_lecturer(
         self, db: Session, *, lecturer_id: UUID, skip: int = 0, limit: int = 100
-    ) -> List[AttendanceSession]:
+    ) -> tuple[List[AttendanceSession], int]:
         from app.models.course_assignment import CourseAssignment
 
-        return (
+        base_query = (
             db.query(AttendanceSession)
             .join(
                 CourseAssignment,
                 AttendanceSession.course_assignment_id == CourseAssignment.id,
             )
             .filter(CourseAssignment.lecturer_id == lecturer_id)
+        )
+        total = base_query.count()
+        items = (
+            base_query
             .order_by(AttendanceSession.start_time.desc())
             .offset(skip)
             .limit(limit)
             .all()
         )
+        return items, total
 
     def open_session(
         self, db: Session, *, obj_in: AttendanceSessionCreate

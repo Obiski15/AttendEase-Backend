@@ -2,7 +2,7 @@ import logging
 from typing import Any, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app import crud, schemas
@@ -15,17 +15,19 @@ logger = logging.getLogger(__name__)
 
 @router.get(
     "/",
-    response_model=List[schemas.Lecturer],
+    response_model=schemas.PaginatedResponse[schemas.Lecturer],
     summary="List lecturers (admin)",
 )
 def read_lecturers(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
+    search: str | None = Query(None, description="Search term for name, email, or staff ID"),
     _: User = Depends(deps.require_admin),
 ) -> Any:
     """List lecturers. Admin only."""
-    return crud.lecturer.get_multi(db, skip=skip, limit=limit)
+    items, total = crud.lecturer.get_paginated(db, skip=skip, limit=limit, search=search)
+    return {"items": items, "total": total, "skip": skip, "limit": limit}
 
 
 @router.post(

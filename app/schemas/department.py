@@ -22,4 +22,4 @@ class Department(DepartmentBase):
     created_at: Optional[datetime] = Field(default=None, description="Creation timestamp.")
     updated_at: Optional[datetime] = Field(default=None, description="Last update timestamp.")
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)

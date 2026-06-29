@@ -27,3 +27,4 @@ from .attendance_record import (
     AttendanceCheckIn,
 )
 from .dashboard import AdminDashboard, LecturerDashboard, StudentDashboard
+from .pagination import PaginatedResponse

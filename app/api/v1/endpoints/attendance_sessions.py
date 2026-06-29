@@ -82,7 +82,7 @@ def open_attendance_session(
 
 @router.get(
     "/",
-    response_model=List[schemas.AttendanceSession],
+    response_model=schemas.PaginatedResponse[schemas.AttendanceSession],
     summary="List attendance sessions (staff)",
 )
 def read_attendance_sessions(
@@ -105,14 +105,17 @@ def read_attendance_sessions(
             and assignment.lecturer_id != current_user.id
         ):
             raise HTTPException(status_code=403, detail="Not enough privileges.")
-        return crud.attendance_session.get_multi_by_assignment(
+        items, total = crud.attendance_session.get_paginated_by_assignment(
             db, course_assignment_id=course_assignment_id, skip=skip, limit=limit
         )
+        return {"items": items, "total": total, "skip": skip, "limit": limit}
     if current_user.role == "LECTURER":
-        return crud.attendance_session.get_multi_by_lecturer(
+        items, total = crud.attendance_session.get_paginated_by_lecturer(
             db, lecturer_id=current_user.id, skip=skip, limit=limit
         )
-    return crud.attendance_session.get_multi(db, skip=skip, limit=limit)
+        return {"items": items, "total": total, "skip": skip, "limit": limit}
+    items, total = crud.attendance_session.get_paginated(db, skip=skip, limit=limit)
+    return {"items": items, "total": total, "skip": skip, "limit": limit}
 
 
 @router.get(
