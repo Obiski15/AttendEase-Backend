@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 @router.get(
     "/",
-    response_model=List[schemas.Student],
+    response_model=schemas.PaginatedResponse[schemas.Student],
     summary="List students (admin/lecturer)",
 )
 def read_students(
@@ -25,7 +25,8 @@ def read_students(
     _: User = Depends(deps.require_staff),
 ) -> Any:
     """List students. Admin or lecturer."""
-    return crud.student.get_multi(db, skip=skip, limit=limit)
+    items, total = crud.student.get_paginated(db, skip=skip, limit=limit)
+    return {"items": items, "total": total, "skip": skip, "limit": limit}
 
 
 @router.post(

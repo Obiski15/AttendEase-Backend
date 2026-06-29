@@ -37,25 +37,28 @@ class CRUDAttendanceRecord(
             .all()
         )
 
-    def get_multi_by_student(
+    def get_paginated_by_student(
         self, db: Session, *, student_id: UUID, skip: int = 0, limit: int = 100
-    ) -> List[AttendanceRecord]:
-        # Inline import to avoid circular dependency if models are importing CRUD
+    ) -> tuple[List[AttendanceRecord], int]:
         from app.models.attendance_session import AttendanceSession
         from app.models.course_assignment import CourseAssignment
-        return (
-            db.query(AttendanceRecord)
+        
+        base_query = db.query(AttendanceRecord).filter(AttendanceRecord.student_id == student_id)
+        total = base_query.count()
+        
+        items = (
+            base_query
             .options(
                 joinedload(AttendanceRecord.attendance_session)
                 .joinedload(AttendanceSession.course_assignment)
                 .joinedload(CourseAssignment.course)
             )
-            .filter(AttendanceRecord.student_id == student_id)
             .order_by(AttendanceRecord.check_in_time.desc())
             .offset(skip)
             .limit(limit)
             .all()
         )
+        return items, total
 
 
 attendance_record = CRUDAttendanceRecord(AttendanceRecord)

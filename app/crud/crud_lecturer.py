@@ -18,10 +18,23 @@ class CRUDLecturer(CRUDBase[Lecturer, LecturerCreate, LecturerUpdate]):
     def get_by_staff_id(self, db: Session, *, staff_id: str) -> Optional[Lecturer]:
         return db.query(Lecturer).filter(Lecturer.staff_id == staff_id).first()
 
-    def get_multi(
-        self, db: Session, *, skip: int = 0, limit: int = 100
-    ) -> List[Lecturer]:
-        return db.query(Lecturer).offset(skip).limit(limit).all()
+
+    def get_paginated(
+        self, db: Session, *, skip: int = 0, limit: int = 100, search: Optional[str] = None
+    ) -> tuple[List[Lecturer], int]:
+        from sqlalchemy import or_
+        query = db.query(Lecturer)
+        if search:
+            query = query.join(User).filter(
+                or_(
+                    User.full_name.ilike(f"%{search}%"),
+                    User.email.ilike(f"%{search}%"),
+                    Lecturer.staff_id.ilike(f"%{search}%")
+                )
+            )
+        total = query.count()
+        items = query.offset(skip).limit(limit).all()
+        return items, total
 
     def create_with_user(self, db: Session, *, obj_in: LecturerCreate) -> Lecturer:
         """Provision the User account and the Lecturer profile together."""
