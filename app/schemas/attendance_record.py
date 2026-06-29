@@ -45,7 +45,7 @@ class AttendanceRecord(AttendanceRecordBase):
     id: UUID = Field(..., description="Unique ID of the attendance record.", example="123e4567-e89b-12d3-a456-426614174002")
     created_at: Optional[datetime] = Field(default=None, description="When the record was created.")
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AttendanceHistoryRecord(AttendanceRecord):

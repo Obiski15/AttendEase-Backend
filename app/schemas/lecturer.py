@@ -33,4 +33,4 @@ class Lecturer(LecturerBase):
     user: Optional[User] = Field(default=None, description="The nested User account details.")
     department: Optional[Department] = Field(default=None, description="The department the lecturer belongs to.")
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)

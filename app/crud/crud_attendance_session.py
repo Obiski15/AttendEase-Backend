@@ -31,15 +31,7 @@ class CRUDAttendanceSession(
             .first()
         )
 
-    def get_multi_by_assignment(
-        self,
-        db: Session,
-        *,
-        course_assignment_id: UUID,
-        skip: int = 0,
-        limit: int = 100
-    ) -> List[AttendanceSession]:
-        return self.get_paginated_by_assignment(db, course_assignment_id=course_assignment_id, skip=skip, limit=limit)[0]
+
 
     def get_paginated_by_assignment(
         self,
@@ -56,10 +48,7 @@ class CRUDAttendanceSession(
 
 
 
-    def get_multi_by_lecturer(
-        self, db: Session, *, lecturer_id: UUID, skip: int = 0, limit: int = 100
-    ) -> List[AttendanceSession]:
-        return self.get_paginated_by_lecturer(db, lecturer_id=lecturer_id, skip=skip, limit=limit)[0]
+
         
 
     def get_paginated_by_lecturer(

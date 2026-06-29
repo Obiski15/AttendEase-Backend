@@ -32,7 +32,7 @@ class User(UserBase):
     created_at: Optional[datetime] = Field(default=None, description="Timestamp of account creation.")
     updated_at: Optional[datetime] = Field(default=None, description="Timestamp of last account update.")
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PasswordUpdate(BaseModel):

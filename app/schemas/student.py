@@ -50,4 +50,4 @@ class Student(StudentBase):
     user: Optional[User] = Field(default=None, description="The user details associated with this student.")
     department: Optional[Department] = Field(default=None, description="The department the student belongs to.")
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)

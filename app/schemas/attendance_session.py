@@ -58,4 +58,4 @@ class AttendanceSession(AttendanceSessionBase):
     records_count: int = Field(default=0, description="Number of students who have checked in.", example=45)
     total_students: int = Field(default=0, description="Total number of students enrolled.", example=50)
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(from_attributes=True)
