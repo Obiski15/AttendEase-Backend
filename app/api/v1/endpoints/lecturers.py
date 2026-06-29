@@ -2,7 +2,7 @@ import logging
 from typing import Any, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app import crud, schemas
@@ -12,8 +12,6 @@ from app.models.user import User
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-
-from fastapi import APIRouter, Depends, HTTPException, status, Query
 
 @router.get(
     "/",
