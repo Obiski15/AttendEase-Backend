@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import ConfigDict, BaseModel, EmailStr, Field
 
 from app.schemas.user import User
+from app.schemas.department import Department
 
 
 class StudentBase(BaseModel):
