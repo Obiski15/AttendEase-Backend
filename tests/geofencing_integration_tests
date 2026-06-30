@@ -1,0 +1,189 @@
+"""
+Geofencing Integration Tests
+For testing the check-in behaviour when geofencing is enabled on an attendance session.
+"""
+
+import uuid
+from datetime import datetime, timedelta, timezone
+from unittest.mock import MagicMock
+
+import pytest
+from fastapi.testclient import TestClient
+
+from app.main import app
+from app.api import deps
+
+def make_user(role: str = "STUDENT") -> MagicMock:
+    user = MagicMock()
+    user.id = uuid.uuid4()
+    user.role = role
+    user.status = "ACTIVE"
+    return user
+
+
+def make_student(user_id=None) -> MagicMock:
+    student = MagicMock()
+    student.user_id = user_id or uuid.uuid4()
+    return student
+
+
+def make_session(
+    *,
+    geofencing_enabled: bool = True,
+    latitude: float = 9.0579,   # session venue latitude
+    longitude: float = 7.4951,  # session venue longitude
+    radius_meters: int = 50,
+    is_open: bool = True,
+) -> MagicMock:
+    session = MagicMock()
+    session.id = uuid.uuid4()
+    session.session_code = "TEST123"
+    session.geofencing_enabled = geofencing_enabled
+    session.latitude = latitude
+    session.longitude = longitude
+    session.radius_meters = radius_meters
+    # is_open is checked via crud, not a direct attribute,
+    # but we store it here for convenience (used in crud mock below)
+    session._is_open = is_open
+    return session
+
+
+
+@pytest.fixture()
+def mock_db():
+    """Return a bare MagicMock that stands in for a SQLAlchemy Session."""
+    return MagicMock()
+
+
+@pytest.fixture()
+def student_user():
+    return make_user(role="STUDENT")
+
+
+@pytest.fixture()
+def geo_session():
+    """An open, geofencing-enabled attendance session."""
+    return make_session(geofencing_enabled=True, radius_meters=50)
+
+
+def override_get_db(mock_db):
+    """Return a dependency override factory that yields *mock_db*."""
+    def _override():
+        yield mock_db
+    return _override
+
+
+def override_require_student(user):
+    """Return a dependency override that returns *user* directly."""
+    def _override():
+        return user
+    return _override
+
+
+def build_client(mock_db, student_user, geo_session, existing_record=None):
+    """
+    Wire up dependency overrides and patch crud calls, then return a
+    TestClient ready to make requests.
+    """
+    import app.crud as crud
+
+    # Patch crud calls used inside check_in()
+    crud.student.get = MagicMock(return_value=make_student(student_user.id))
+    crud.attendance_session.get_by_code = MagicMock(return_value=geo_session)
+    crud.attendance_session.is_open = MagicMock(return_value=geo_session._is_open)
+    crud.attendance_record.get_by_session_and_student = MagicMock(
+        return_value=existing_record
+    )
+
+    # Make db.add / db.commit / db.refresh no-ops
+    mock_db.add = MagicMock()
+    mock_db.commit = MagicMock()
+    mock_db.refresh = MagicMock()
+
+    app.dependency_overrides[deps.get_db] = override_get_db(mock_db)
+    app.dependency_overrides[deps.require_student] = override_require_student(
+        student_user
+    )
+
+    client = TestClient(app, raise_server_exceptions=False)
+    return client
+
+
+def teardown_overrides():
+    app.dependency_overrides.clear()
+
+
+# ---------------------------------------------------------------------------
+# Tests
+# ---------------------------------------------------------------------------
+
+class TestGeofencingCheckIn:
+
+    def test_missing_coordinates_rejected(self, mock_db, student_user, geo_session):
+        """
+        When geofencing is enabled and the student sends no lat/lon,
+        the API must return 400 with a clear error message.
+        """
+        client = build_client(mock_db, student_user, geo_session)
+
+        response = client.post(
+            "/api/v1/attendance/check-in",   # adjust path to match your router prefix
+            json={"session_code": "TEST123"} # latitude & longitude intentionally omitted
+        )
+
+        assert response.status_code == 400
+        assert "coordinates" in response.json()["detail"].lower() or \
+               "location" in response.json()["detail"].lower()
+
+        teardown_overrides()
+
+    def test_outside_radius_rejected(self, mock_db, student_user, geo_session):
+        """
+        Student is ~60 m away from the session venue (beyond the 50 m radius).
+        The API must return 400 with a proximity violation message.
+
+        Venue:   lat=9.0579,  lon=7.4951
+        Student: lat=9.05844, lon=7.4951   (~60 m north)
+        """
+        client = build_client(mock_db, student_user, geo_session)
+
+        response = client.post(
+            "/api/v1/attendance/check-in",
+            json={
+                "session_code": "TEST123",
+                "latitude": 9.05844,   # ~60 m north of venue
+                "longitude": 7.4951,
+            }
+        )
+
+        assert response.status_code == 400
+        detail = response.json()["detail"].lower()
+        assert "outside" in detail or "area" in detail or "distance" in detail
+
+        teardown_overrides()
+
+    # def test_within_radius_accepted(self, mock_db, student_user, geo_session):
+    #     """
+    #     Student is ~10 m away from the session venue (well within the 50 m radius).
+    #     The API must return 200 and create an attendance record.
+    #
+    #     Venue:   lat=9.0579,  lon=7.4951
+    #     Student: lat=9.05799, lon=7.4951   (~10 m north)
+    #     """
+    #     client = build_client(mock_db, student_user, geo_session)
+    #
+    #     response = client.post(
+    #         "/api/v1/attendance/check-in",
+    #         json={
+    #             "session_code": "TEST123",
+    #             "latitude": 9.05799,   # ~10 m north of venue — within 50 m
+    #             "longitude": 7.4951,
+    #         }
+    #     )
+    #
+    #     assert response.status_code == 200
+    #     # The record should have been persisted
+    #     mock_db.add.assert_called_once()
+    #     mock_db.commit.assert_called_once()
+    #
+    #     teardown_overrides()
